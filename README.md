@@ -6,7 +6,7 @@ SearchWP plugin to add Finnish base forms in search index using [Voikko](https:/
 
 * Node.js server
 * SearchWP 2.5 or later
-* About 1GB or free RAM available
+* About 1GB of free RAM available
 * PHP 5.3
 
 ## Installation
