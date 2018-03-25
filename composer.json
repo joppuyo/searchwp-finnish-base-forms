@@ -1,4 +1,8 @@
 {
+    "name": "joppuyo/searchwp-finnish-base-forms",
+    "type": "wordpress-plugin",
+    "description": "SearchWP plugin to add Finnish base forms in search index",
+    "license": "GPL-3.0-or-later",
     "require": {
         "guzzlehttp/guzzle": "^6.3",
         "nlp-tools/nlp-tools": "^0.1.3"
