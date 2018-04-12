@@ -15,3 +15,10 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js and 
 1. Clone this plugin into **wp-content/plugins**
 2. SSH into your web server and navigate to **wp-content/plugins/searchwp-finnish-base-forms/node**. Copy **config.sample.js** into **config.js** Run **npm install && npm install -g pm2 && pm2 start index.js**
 3. **Activate** SearchWP Finnish Base Forms from your Plugins page
+
+== Changelog ==
+= 1.0.1 =
+* Allow using local plugin Composer or global Bedrock Composer
+
+= 1.0.0 =
+* Initial release
