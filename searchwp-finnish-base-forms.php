@@ -11,7 +11,10 @@ Text Domain: searchwp-finnish-base-forms
 
 defined('ABSPATH') or die('I wish I was using a real MVC framework');
 
-require 'vendor/autoload.php';
+// Check if we are using local composer
+if (file_exists(__DIR__ . '/vendor')) {
+    require 'vendor/autoload.php';
+}
 
 if (get_option('searchwp_finnish_base_forms_api_url')) {
     add_filter('searchwp_indexer_pre_process_content', function ($content) {
