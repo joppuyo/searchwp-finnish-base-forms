@@ -27,6 +27,7 @@ if (get_option('searchwp_finnish_base_forms_api_url') && get_option('searchwp_fi
         $terms = implode(' ', $terms);
         $terms = searchwp_finnish_base_forms_lemmatize($terms);
         $terms = explode(' ', $terms);
+        $terms = array_unique($terms);
         return $terms;
     }, 10, 2);
 }
