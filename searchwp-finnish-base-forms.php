@@ -43,7 +43,7 @@ function searchwp_finnish_base_forms_settings_page()
     if (!empty($_POST['submit'])) {
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
-        update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] ? 1 : 0);
+        update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
         $updated = true;
     }
 
@@ -72,7 +72,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                    <label>' . __('Add base forms to search query', 'searchwp_finnish_base_forms') . '</label>';
     echo '                </th>';
     echo '                <td>';
-    echo '                <input type="checkbox" name="lemmatize_search_query" id="lemmatize_search_query" value="1" ' . checked(get_option('searchwp_finnish_base_forms_lemmatize_search_query') === '1', true, false) . ' />';
+    echo '                <input type="checkbox" name="lemmatize_search_query" id="lemmatize_search_query" value="checked" ' . checked(get_option('searchwp_finnish_base_forms_lemmatize_search_query'), '1', false) . ' />';
     echo '                <label for="lemmatize_search_query">Enabled</label>';
     echo '                </td>';
     echo '            </tr>';
@@ -137,3 +137,5 @@ add_action('admin_menu', function () {
         'searchwp_finnish_base_forms_settings_page'
     );
 });
+
+
