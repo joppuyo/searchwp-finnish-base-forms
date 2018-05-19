@@ -30,7 +30,7 @@ if (get_option('searchwp_finnish_base_forms_api_url')) {
         $requests = function () use ($client, $tokenized, $apiRoot) {
             foreach ($tokenized as $token) {
                 yield function () use ($client, $token, $apiRoot) {
-                    return $client->getAsync($apiRoot . '/analyze/' . $token);
+                    return $client->getAsync(trailingslashit($apiRoot) . 'analyze/' . $token);
                 };
             }
         };
