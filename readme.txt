@@ -17,6 +17,10 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js and 
 3. **Activate** SearchWP Finnish Base Forms from your Plugins page
 
 == Changelog ==
+= 1.0.2 =
+* Add option to add base forms to search queries entered by users
+* Normalize API URL trailing slash
+
 = 1.0.1 =
 * Allow using local plugin Composer or global Bedrock Composer
 
