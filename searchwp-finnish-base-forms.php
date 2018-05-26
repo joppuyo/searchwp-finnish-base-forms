@@ -123,7 +123,7 @@ function searchwp_finnish_base_forms_lemmatize($content) {
     $promise = $pool->promise();
     $promise->wait();
 
-    $content = $content . ' ' . implode(' ', $extraWords);
+    $content = trim($content . ' ' . implode(' ', $extraWords));
 
     return $content;
 }
