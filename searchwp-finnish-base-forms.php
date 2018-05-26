@@ -45,10 +45,12 @@ function searchwp_finnish_base_forms_settings_page()
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
         update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
+        update_option('searchwp_finnish_base_forms_api_type', $_POST['api_type'] === 'web_api' ? 'web_api' : 'command_line');
         $updated = true;
     }
 
     $apiUrl = get_option('searchwp_finnish_base_forms_api_url');
+    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
 
     echo '<div class="wrap">';
     echo '    <h1>' . __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms') . '</h1>';
@@ -62,7 +64,21 @@ function searchwp_finnish_base_forms_settings_page()
     echo '        <tbody>';
     echo '            <tr>';
     echo '                <th scope="row">';
-    echo '                    <label for="api_url">' . __('Node API URL', 'searchwp_finnish_base_forms') . '</label>';
+    echo '                    <label for="api_url">' . __('API type', 'searchwp_finnish_base_forms') . '</label>';
+    echo '                </th>';
+    echo '                <td>';
+    echo '                <p><input type="radio" id="web_api" name="api_type" value="web_api" ' . checked($apiType, 'web_api', false) . '><label for="web_api">Web API</label></p>';
+    echo '                <p><input type="radio" id="command_line" name="api_type" value="command_line" ' . checked($apiType, 'command_line', false) . '><label for="command_line">Voikko command line</label></p>';
+    echo '                </td>';
+    echo '            </tr>';
+    echo '            <tr>';
+    echo '                <th colspan="2">';
+    echo '                <span style="font-weight: 400">Note: "Voikko command line" option requires voikkospell command application installed on the server.</span>';
+    echo '                </td>';
+    echo '            </tr>';
+    echo '            <tr class="js-searchwp-finnish-base-forms-api-url">';
+    echo '                <th scope="row">';
+    echo '                    <label for="api_url">' . __('Web API URL', 'searchwp_finnish_base_forms') . '</label>';
     echo '                </th>';
     echo '                <td>';
     echo '                <input name="api_url" type="url" id="api_url" value="' . esc_url($apiUrl) . '" class="regular-text">';
@@ -79,7 +95,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '            </tr>';
     echo '            <tr>';
     echo '                <th colspan="2">';
-    echo '                <span style="font-weight: 400">Note: if you enable "Add base forms to search query", the API will be called every time a search if performed, this might have performance implications.</span>';
+    echo '                <span style="font-weight: 400">Note: if you enable "Add base forms to search query", Voikko will be called every time a search if performed, this might have performance implications.</span>';
     echo '                </td>';
     echo '            </tr>';
     echo '        </tbody>';
@@ -139,4 +155,9 @@ add_action('admin_menu', function () {
     );
 });
 
-
+add_action('admin_enqueue_scripts', function ($hook) {
+    if ($hook !== 'settings_page_searchwp_finnish_base_forms') {
+        return;
+    }
+    wp_enqueue_script('my_custom_script', plugin_dir_url(__FILE__) . '/js/script.js');
+});
