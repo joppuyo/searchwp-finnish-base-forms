@@ -108,10 +108,48 @@ function searchwp_finnish_base_forms_settings_page()
     echo '</div>';
 }
 
-function searchwp_finnish_base_forms_lemmatize($content) {
-    $tokenizer = new \NlpTools\Tokenizers\WhitespaceAndPunctuationTokenizer();
-    $tokenized = $tokenizer->tokenize(strip_tags($content));
+function searchwp_finnish_base_forms_voikkospell($words) {
+    // Write input to a temporary file because writing large input straight to
+    // stdin in PHP doesn't work.
+    $tmpfname = tempnam(get_temp_dir(), "voikkospell");
+    $temp = fopen($tmpfname, "w");
+    foreach ($words as $word) {
+        fwrite($temp, $word);
+        fwrite($temp, "\n");
+    }
+    fclose($temp);
 
+    try {
+        $descriptorspec = [
+            0 => ['file', $tmpfname, 'r'],
+            1 => ['pipe', 'w'],
+        ];
+        $process = proc_open('voikkospell -M', $descriptorspec, $pipes);
+        if (!is_resource($process)) {
+            throw new Exception('Unable to start voikkospell');
+        }
+
+        $baseforms = [];
+        while (($line = fgets($pipes[1])) !== false) {
+            if (preg_match('/BASEFORM=(.*)$/', $line, $matches)) {
+                $baseforms[] = $matches[1];
+            }
+        }
+        fclose($pipes[1]);
+
+        if (proc_close($process)) {
+            throw new Exception('Failed to run voikkospell');
+        }
+
+        return $baseforms;
+    } catch (Exception $e) {
+        throw $e;
+    } finally {
+        unlink($tmpfname);
+    }
+}
+
+function searchwp_finnish_base_forms_web_api($tokenized) {
     $apiRoot = get_option('searchwp_finnish_base_forms_api_url');
 
     $client = new \GuzzleHttp\Client();
@@ -138,6 +176,21 @@ function searchwp_finnish_base_forms_lemmatize($content) {
 
     $promise = $pool->promise();
     $promise->wait();
+
+    return $extraWords;
+}
+
+function searchwp_finnish_base_forms_lemmatize($content) {
+    $tokenizer = new \NlpTools\Tokenizers\WhitespaceAndPunctuationTokenizer();
+    $tokenized = $tokenizer->tokenize(strip_tags($content));
+
+    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
+
+    if ($apiType === 'command_line') {
+        $extraWords = searchwp_finnish_base_forms_voikkospell($tokenized);
+    } else {
+        $extraWords = searchwp_finnish_base_forms_web_api($tokenized);
+    }
 
     $content = trim($content . ' ' . implode(' ', $extraWords));
 
