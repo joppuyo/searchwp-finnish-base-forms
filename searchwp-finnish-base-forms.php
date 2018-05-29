@@ -71,17 +71,25 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                <p><input type="radio" id="command_line" name="api_type" value="command_line" ' . checked($apiType, 'command_line', false) . '><label for="command_line">Voikko command line</label></p>';
     echo '                </td>';
     echo '            </tr>';
-    echo '            <tr>';
-    echo '                <th colspan="2">';
-    echo '                <span style="font-weight: 400">Note: "Voikko command line" option requires voikkospell command application installed on the server.</span>';
-    echo '                </td>';
-    echo '            </tr>';
     echo '            <tr class="js-searchwp-finnish-base-forms-api-url">';
     echo '                <th scope="row">';
     echo '                    <label for="api_url">' . __('Web API URL', 'searchwp_finnish_base_forms') . '</label>';
     echo '                </th>';
     echo '                <td>';
     echo '                <input name="api_url" type="url" id="api_url" value="' . esc_url($apiUrl) . '" class="regular-text">';
+    echo '                </td>';
+    echo '            </tr>';
+    echo '            <tr>';
+    echo '                <th>';
+    echo '                </th>';
+    echo '                <td>';
+    echo '                    <input type="button" class="button js-searchwp-finnish-base-forms-test" value="Test">';
+    echo '                    <output class="js-searchwp-finnish-base-forms-test-output" style="line-height:28px;margin-left:4px"></output>';
+    echo '                </td>';
+    echo '            </tr>';
+    echo '            <tr>';
+    echo '                <th colspan="2">';
+    echo '                <span style="font-weight: 400">Note: "Voikko command line" option requires voikkospell command application installed on the server.</span>';
     echo '                </td>';
     echo '            </tr>';
     echo '            <tr>';
@@ -117,10 +125,8 @@ function searchwp_finnish_base_forms_voikkospell($words)
     return $matches[1];
 }
 
-function searchwp_finnish_base_forms_web_api($tokenized)
+function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
 {
-    $apiRoot = get_option('searchwp_finnish_base_forms_api_url');
-
     $client = new \GuzzleHttp\Client();
 
     $extraWords = [];
@@ -159,13 +165,29 @@ function searchwp_finnish_base_forms_lemmatize($content)
     if ($apiType === 'command_line') {
         $extraWords = searchwp_finnish_base_forms_voikkospell($tokenized);
     } else {
-        $extraWords = searchwp_finnish_base_forms_web_api($tokenized);
+        $apiRoot = get_option('searchwp_finnish_base_forms_api_url');
+        $extraWords = searchwp_finnish_base_forms_web_api($tokenized, $apiRoot);
     }
 
     $content = trim($content . ' ' . implode(' ', $extraWords));
 
     return $content;
 }
+
+add_action('wp_ajax_searchwp_finnish_base_forms_lemmatize', function () {
+    $apiType = $_POST['api_type'];
+    if ($apiType === 'command_line') {
+        $baseforms = searchwp_finnish_base_forms_voikkospell(['käden']);
+    } else {
+        $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
+    }
+    if ($baseforms === ['käsi']) {
+        echo 'OK';
+    } else {
+        echo 'FAIL';
+    }
+    wp_die();
+});
 
 add_action('admin_menu', function () {
     add_submenu_page(
