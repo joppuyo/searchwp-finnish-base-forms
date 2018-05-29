@@ -116,6 +116,32 @@ function searchwp_finnish_base_forms_settings_page()
     echo '</div>';
 }
 
+// Simple white space tokenizer. Breaks either on whitespace or on word
+// boundaries (ex.: dots, commas, etc) Does not include white space or
+// punctuations in tokens.
+//
+// Based on NlpTools (http://php-nlp-tools.com/) under WTFPL license.
+function searchwp_finnish_base_forms_tokenize($str)
+{
+    $arr = array();
+    // for the character classes
+    // see http://php.net/manual/en/regexp.reference.unicode.php
+    $pat = '/
+                ([\pZ\pC]*)       # match any separator or other
+                                  # in sequence
+                (
+                    [^\pP\pZ\pC]+ # match a sequence of characters
+                                  # that are not punctuation,
+                                  # separator or other
+                )
+                ([\pZ\pC]*)       # match a sequence of separators
+                                  # that follows
+            /xu';
+    preg_match_all($pat, $str, $arr);
+
+    return $arr[2];
+}
+
 function searchwp_finnish_base_forms_voikkospell($words)
 {
     $process = new \Symfony\Component\Process\Process('voikkospell -M');
@@ -157,8 +183,7 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
 
 function searchwp_finnish_base_forms_lemmatize($content)
 {
-    $tokenizer = new \NlpTools\Tokenizers\WhitespaceAndPunctuationTokenizer();
-    $tokenized = $tokenizer->tokenize(strip_tags($content));
+    $tokenized = searchwp_finnish_base_forms_tokenize(strip_tags($content));
 
     $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
 
