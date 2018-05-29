@@ -109,44 +109,11 @@ function searchwp_finnish_base_forms_settings_page()
 }
 
 function searchwp_finnish_base_forms_voikkospell($words) {
-    // Write input to a temporary file because writing large input straight to
-    // stdin in PHP doesn't work.
-    $tmpfname = tempnam(get_temp_dir(), "voikkospell");
-    $temp = fopen($tmpfname, "w");
-    foreach ($words as $word) {
-        fwrite($temp, $word);
-        fwrite($temp, "\n");
-    }
-    fclose($temp);
-
-    try {
-        $descriptorspec = [
-            0 => ['file', $tmpfname, 'r'],
-            1 => ['pipe', 'w'],
-        ];
-        $process = proc_open('voikkospell -M', $descriptorspec, $pipes);
-        if (!is_resource($process)) {
-            throw new Exception('Unable to start voikkospell');
-        }
-
-        $baseforms = [];
-        while (($line = fgets($pipes[1])) !== false) {
-            if (preg_match('/BASEFORM=(.*)$/', $line, $matches)) {
-                $baseforms[] = $matches[1];
-            }
-        }
-        fclose($pipes[1]);
-
-        if (proc_close($process)) {
-            throw new Exception('Failed to run voikkospell');
-        }
-
-        return $baseforms;
-    } catch (Exception $e) {
-        throw $e;
-    } finally {
-        unlink($tmpfname);
-    }
+    $process = new \Symfony\Component\Process\Process('voikkospell -M');
+    $process->setInput(implode($words, "\n"));
+    $process->run();
+    preg_match_all('/BASEFORM=(.*)$/m', $process->getOutput(), $matches);
+    return $matches[1];
 }
 
 function searchwp_finnish_base_forms_web_api($tokenized) {
