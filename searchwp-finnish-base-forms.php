@@ -108,7 +108,8 @@ function searchwp_finnish_base_forms_settings_page()
     echo '</div>';
 }
 
-function searchwp_finnish_base_forms_voikkospell($words) {
+function searchwp_finnish_base_forms_voikkospell($words)
+{
     $process = new \Symfony\Component\Process\Process('voikkospell -M');
     $process->setInput(implode($words, "\n"));
     $process->run();
@@ -116,7 +117,8 @@ function searchwp_finnish_base_forms_voikkospell($words) {
     return $matches[1];
 }
 
-function searchwp_finnish_base_forms_web_api($tokenized) {
+function searchwp_finnish_base_forms_web_api($tokenized)
+{
     $apiRoot = get_option('searchwp_finnish_base_forms_api_url');
 
     $client = new \GuzzleHttp\Client();
@@ -132,13 +134,13 @@ function searchwp_finnish_base_forms_web_api($tokenized) {
     };
 
     $pool = new \GuzzleHttp\Pool($client, $requests(), [
-      'concurrency' => 10,
-      'fulfilled' => function ($response) use (&$extraWords) {
-          $response = json_decode($response->getBody()->getContents(), true);
-          if (count($response)) {
-              array_push($extraWords, $response[0]['BASEFORM']);
-          }
-      },
+        'concurrency' => 10,
+        'fulfilled' => function ($response) use (&$extraWords) {
+            $response = json_decode($response->getBody()->getContents(), true);
+            if (count($response)) {
+                array_push($extraWords, $response[0]['BASEFORM']);
+            }
+        },
     ]);
 
     $promise = $pool->promise();
@@ -147,7 +149,8 @@ function searchwp_finnish_base_forms_web_api($tokenized) {
     return $extraWords;
 }
 
-function searchwp_finnish_base_forms_lemmatize($content) {
+function searchwp_finnish_base_forms_lemmatize($content)
+{
     $tokenizer = new \NlpTools\Tokenizers\WhitespaceAndPunctuationTokenizer();
     $tokenized = $tokenizer->tokenize(strip_tags($content));
 
