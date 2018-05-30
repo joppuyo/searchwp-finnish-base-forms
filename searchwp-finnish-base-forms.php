@@ -30,6 +30,10 @@ if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_f
         $terms = array_unique($terms);
         return $terms;
     }, 10, 2);
+
+    // By default SearchWP will try AND logic first and after that OR logic if there are no results.
+    // Because we have the same search term multiple times, we want to always use OR logic
+    add_filter('searchwp_and_logic', '__return_false');
 }
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
