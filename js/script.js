@@ -17,7 +17,7 @@
       event.preventDefault();
       $('.js-searchwp-finnish-base-forms-submit-button').attr('disabled', true);
       var data = {
-        action: 'searchwp_finnish_base_forms_lemmatize',
+        action: 'searchwp_finnish_base_forms_test',
       };
       if ($('input[name=api_type]:checked').val() === 'command_line') {
         data.api_type = 'command_line';

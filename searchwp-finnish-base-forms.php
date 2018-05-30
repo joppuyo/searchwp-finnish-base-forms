@@ -195,7 +195,7 @@ function searchwp_finnish_base_forms_lemmatize($content)
     return $content;
 }
 
-add_action('wp_ajax_searchwp_finnish_base_forms_lemmatize', function () {
+add_action('wp_ajax_searchwp_finnish_base_forms_test', function () {
     $apiType = $_POST['api_type'];
     if ($apiType === 'command_line') {
         $baseforms = searchwp_finnish_base_forms_voikkospell(['käden']);
