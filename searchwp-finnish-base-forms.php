@@ -123,10 +123,11 @@ function searchwp_finnish_base_forms_settings_page()
 // Based on NlpTools (http://php-nlp-tools.com/) under WTFPL license.
 function searchwp_finnish_base_forms_tokenize($str)
 {
-    $arr = array();
+    $arr = [];
     // for the character classes
     // see http://php.net/manual/en/regexp.reference.unicode.php
-    $pat = '/
+    $pat
+      = '/
                 ([\pZ\pC]*)       # match any separator or other
                                   # in sequence
                 (
@@ -166,13 +167,13 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
     };
 
     $pool = new \GuzzleHttp\Pool($client, $requests(), [
-        'concurrency' => 10,
-        'fulfilled' => function ($response) use (&$extraWords) {
-            $response = json_decode($response->getBody()->getContents(), true);
-            if (count($response)) {
-                array_push($extraWords, $response[0]['BASEFORM']);
-            }
-        },
+      'concurrency' => 10,
+      'fulfilled' => function ($response) use (&$extraWords) {
+          $response = json_decode($response->getBody()->getContents(), true);
+          if (count($response)) {
+              array_push($extraWords, $response[0]['BASEFORM']);
+          }
+      },
     ]);
 
     $promise = $pool->promise();
@@ -216,12 +217,12 @@ add_action('wp_ajax_searchwp_finnish_base_forms_lemmatize', function () {
 
 add_action('admin_menu', function () {
     add_submenu_page(
-        null,
-        __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms'),
-        __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms'),
-        'manage_options',
-        'searchwp_finnish_base_forms',
-        'searchwp_finnish_base_forms_settings_page'
+      null,
+      __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms'),
+      __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms'),
+      'manage_options',
+      'searchwp_finnish_base_forms',
+      'searchwp_finnish_base_forms_settings_page'
     );
 });
 
