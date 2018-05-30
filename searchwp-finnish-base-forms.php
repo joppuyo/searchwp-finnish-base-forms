@@ -16,13 +16,13 @@ if (file_exists(__DIR__ . '/vendor')) {
     require 'vendor/autoload.php';
 }
 
-if (get_option('searchwp_finnish_base_forms_api_url')) {
+if (get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_finnish_base_forms_api_type') === 'command_line') {
     add_filter('searchwp_indexer_pre_process_content', function ($content) {
         return searchwp_finnish_base_forms_lemmatize($content);
     });
 }
 
-if (get_option('searchwp_finnish_base_forms_api_url') && get_option('searchwp_finnish_base_forms_lemmatize_search_query')) {
+if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_finnish_base_forms_api_type') === 'command_line') && get_option('searchwp_finnish_base_forms_lemmatize_search_query')) {
     add_filter('searchwp_pre_search_terms', function ($terms, $engine) {
         $terms = implode(' ', $terms);
         $terms = searchwp_finnish_base_forms_lemmatize($terms);
