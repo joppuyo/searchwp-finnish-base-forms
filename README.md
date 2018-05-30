@@ -9,7 +9,7 @@ The CLI application is much faster because it doesn't have the overhead performi
 ## Requirements
 
 * SearchWP 2.5 or later
-* PHP 5.3
+* PHP 5.5.9
 * A server with either Node.js and about 1GB of spare RAM or voikkospell command line application installed
 
 ## Installation
