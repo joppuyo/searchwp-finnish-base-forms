@@ -170,7 +170,10 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
       'fulfilled' => function ($response) use (&$extraWords) {
           $response = json_decode($response->getBody()->getContents(), true);
           if (count($response)) {
-              array_push($extraWords, $response[0]['BASEFORM']);
+              $baseforms = array_map(function($item){
+                  return $item['BASEFORM'];
+              }, $response);
+              $extraWords = array_values(array_merge($extraWords, $baseforms));
           }
       },
     ]);
