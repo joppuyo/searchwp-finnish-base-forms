@@ -11,7 +11,7 @@ Text Domain: searchwp-finnish-base-forms
 
 defined('ABSPATH') or die('I wish I was using a real MVC framework');
 
-// Check if we are using local composer
+// Check if we are using local Composer
 if (file_exists(__DIR__ . '/vendor')) {
     require 'vendor/autoload.php';
 }
