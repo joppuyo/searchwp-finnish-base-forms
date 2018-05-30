@@ -41,7 +41,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links)
 function searchwp_finnish_base_forms_settings_page()
 {
     $updated = false;
-    if (!empty($_POST['submit'])) {
+    if (!empty($_POST)) {
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
         update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
@@ -54,12 +54,13 @@ function searchwp_finnish_base_forms_settings_page()
 
     echo '<div class="wrap">';
     echo '    <h1>' . __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms') . '</h1>';
+    echo '    <div class="js-searchwp-finnish-base-forms-admin-notices"></div>';
     if ($updated) {
-        echo '<div class="notice notice-success">';
-        echo '    <p>' . __('Options have been updated', 'searchwp_finnish_base_forms') . '</p>';
-        echo '</div>';
+        echo '    <div class="notice notice-success">';
+        echo '        <p>' . __('Options have been updated', 'searchwp_finnish_base_forms') . '</p>';
+        echo '    </div>';
     }
-    echo '    <form method="post">';
+    echo '    <form method="post" class="js-searchwp-finnish-base-forms-form">';
     echo '    <table class="form-table">';
     echo '        <tbody>';
     echo '            <tr>';
@@ -77,14 +78,6 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                </th>';
     echo '                <td>';
     echo '                <input name="api_url" type="url" id="api_url" value="' . esc_url($apiUrl) . '" class="regular-text">';
-    echo '                </td>';
-    echo '            </tr>';
-    echo '            <tr>';
-    echo '                <th>';
-    echo '                </th>';
-    echo '                <td>';
-    echo '                    <input type="button" class="button js-searchwp-finnish-base-forms-test" value="Test">';
-    echo '                    <output class="js-searchwp-finnish-base-forms-test-output" style="line-height:28px;margin-left:4px"></output>';
     echo '                </td>';
     echo '            </tr>';
     echo '            <tr>';
@@ -109,7 +102,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '        </tbody>';
     echo '    </table>';
     echo '    <p class="submit">';
-    echo '        <input class="button-primary" type="submit" name="submit" value="Save">';
+    echo '        <input class="button-primary js-searchwp-finnish-base-forms-submit-button" type="submit" name="submit-button" value="Save">';
     echo '    </p>';
     wp_nonce_field('searchwp_finnish_base_forms');
     echo '    </form>';
@@ -210,11 +203,10 @@ add_action('wp_ajax_searchwp_finnish_base_forms_lemmatize', function () {
         $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
     }
     if ($baseforms === ['käsi']) {
-        echo 'OK';
+        wp_die();
     } else {
-        echo 'FAIL';
+        wp_die('', '', ['response' => 500]);
     }
-    wp_die();
 });
 
 add_action('admin_menu', function () {
