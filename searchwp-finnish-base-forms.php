@@ -145,7 +145,9 @@ function searchwp_finnish_base_forms_tokenize($str)
 
 function searchwp_finnish_base_forms_voikkospell($words)
 {
-    $process = new \Symfony\Component\Process\Process('voikkospell -M');
+    $process = new \Symfony\Component\Process\Process('voikkospell -M', null, [
+      'LANG' => 'en_US.UTF-8'
+    ]);
     $process->setInput(implode($words, "\n"));
     $process->run();
     preg_match_all('/BASEFORM=(.*)$/m', $process->getOutput(), $matches);
