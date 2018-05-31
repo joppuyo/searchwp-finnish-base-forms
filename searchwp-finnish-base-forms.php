@@ -91,7 +91,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '            </tr>';
     echo '            <tr>';
     echo '                <th colspan="2">';
-    echo '                <span style="font-weight: 400">Note: "Voikko command line" option requires voikkospell command application installed on the server.</span>';
+    echo '                <span style="font-weight: 400">Note: "Voikko command line" option requires voikkospell command line application installed on the server.</span>';
     echo '                </td>';
     echo '            </tr>';
     echo '            <tr>';
