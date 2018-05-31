@@ -4,7 +4,7 @@ SearchWP plugin to add Finnish base forms into search index using [Voikko](https
 
 You can either use **Node.js application** to access Voikko over HTTP or use a locally installed **voikkospell command line application** to lemmatize the indexed terms.
 
-The CLI application is much faster because it doesn't have the overhead performing a HTTP request.
+The CLI application is much faster because it doesn't have the overhead of performing a HTTP request.
 
 ## Requirements
 
