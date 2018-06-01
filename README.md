@@ -2,7 +2,7 @@
 
 SearchWP plugin to add Finnish base forms into search index using [Voikko](https://voikko.puimula.org/).
 
-You can either use **Node.js application** to access Voikko over HTTP or use a locally installed **voikkospell command line application** to lemmatize the indexed terms.
+You can either use **Node.js application** to access Voikko over HTTP or use a locally installed **voikkospell command line application** to lemmatize the indexed terms. Special thanks to [siiptuo](https://github.com/siiptuo) for contributing voikkospell support for this plugin!
 
 The CLI application is much faster because it doesn't have the overhead of performing a HTTP request.
 
@@ -20,14 +20,12 @@ The CLI application is much faster because it doesn't have the overhead of perfo
 
 ### Node.js web API
 
-1. SSH into your web server and navigate to **wp-content/plugins/searchwp-finnish-base-forms/node**.
-2. Copy **config.sample.js** into **config.js**
-3. Run **npm install && npm install -g pm2 && pm2 start index.js**
-4. Go on the Plugins page, find the plugin, click **Settings** and enter the Node API URL there
+1. Install and start [Voikko Node.js web API](https://github.com/joppuyo/voikko-node-web-api).
+2. Go on the Plugins page, find the plugin, click **Settings** and enter the Node API URL there
 
 ### Voikkospell command line
 
-1. Install voikkospell on your server. On Ubuntu/Debian this can be done with **apt install libvoikko-dev voikko-fi**
+1. Install voikkospell on your server. On Ubuntu/Debian this can be done with `apt install libvoikko-dev voikko-fi`
 2. Go on the Plugins page, find the plugin, click **Settings**. For **API Type** select **Voikko command line**.
 
 After installation, remember to re-index the site from SearchWP settings page.

@@ -14,8 +14,8 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js and 
 == Installation ==
 1. Clone this plugin into **wp-content/plugins**
 2. **Activate** SearchWP Finnish Base Forms from your Plugins page
-3. Either install Node.js application or voikkospell command line application
-4. Configure plugin in **Plugins** and **Settings** under SearchWP Finnish Base Forms
+3. Either install [Node.js application](https://github.com/joppuyo/voikko-node-web-api) or voikkospell command line application
+4. Configure plugin in **Plugins** and **Settings** under **SearchWP Finnish Base Forms**
 
 == Changelog ==
 = 1.1.2 =
