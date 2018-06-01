@@ -18,6 +18,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js and 
 4. Configure plugin in **Plugins** and **Settings** under **SearchWP Finnish Base Forms**
 
 == Changelog ==
+= 2.0.0 =
+* Move Node.js code into its own repository
+
 = 1.1.2 =
 * Index multiple base forms also when using web API
 * Change symfony/process version so it can be installed on both PHP 5 and PHP 7
