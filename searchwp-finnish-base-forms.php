@@ -236,5 +236,5 @@ add_action('admin_enqueue_scripts', function ($hook) {
     if ($hook !== 'settings_page_searchwp_finnish_base_forms') {
         return;
     }
-    wp_enqueue_script('my_custom_script', plugin_dir_url(__FILE__) . '/js/script.js');
+    wp_enqueue_script('searchwp-finnish-base-forms-js', plugin_dir_url(__FILE__) . '/js/script.js');
 });
