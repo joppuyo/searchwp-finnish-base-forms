@@ -34,7 +34,7 @@ if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_f
     // Double amount of maximum search terms just to be sure
     add_filter('searchwp_max_search_terms', function ($maxTerms, $engine) {
         return 12;
-    });
+    }, 10, 2);
 
     // By default SearchWP will try AND logic first and after that OR logic if there are no results.
     // Because we have the same search term multiple times, we want to always use OR logic
