@@ -1,5 +1,7 @@
 # SearchWP Finnish Base Forms
 
+[![Latest Stable Version](https://poser.pugx.org/joppuyo/searchwp-finnish-base-forms/v/stable)](https://packagist.org/packages/joppuyo/searchwp-finnish-base-forms)
+
 SearchWP plugin to add Finnish base forms into search index using [Voikko](https://voikko.puimula.org/).
 
 You can either use **Node.js application** to access Voikko over HTTP or use a locally installed **voikkospell command line application** to lemmatize the indexed terms. Special thanks to [siiptuo](https://github.com/siiptuo) for contributing voikkospell support for this plugin!
