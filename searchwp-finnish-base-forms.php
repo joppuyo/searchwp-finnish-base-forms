@@ -145,6 +145,18 @@ function searchwp_finnish_base_forms_tokenize($str)
     return $arr[2];
 }
 
+function searchwp_finnish_base_forms_parse_wordbases($wordbases)
+{
+    $baseforms = [];
+    foreach ($wordbases as $wordbase) {
+        preg_match_all('/\(([^+].*?)\)/', $wordbase, $matches);
+        foreach ($matches[1] as $match) {
+            $baseforms[] = str_replace('=', '', $match);
+        }
+    }
+    return $baseforms;
+}
+
 function searchwp_finnish_base_forms_voikkospell($words)
 {
     $process = new \Symfony\Component\Process\Process('voikkospell -M', null, [
@@ -152,8 +164,14 @@ function searchwp_finnish_base_forms_voikkospell($words)
     ]);
     $process->setInput(implode($words, "\n"));
     $process->run();
-    preg_match_all('/BASEFORM=(.*)$/m', $process->getOutput(), $matches);
-    return $matches[1];
+
+    preg_match_all('/BASEFORM=(.+)$/m', $process->getOutput(), $matches);
+    $baseforms = $matches[1];
+
+    preg_match_all('/WORDBASES=(.+)$/m', $process->getOutput(), $matches);
+    $wordbases = searchwp_finnish_base_forms_parse_wordbases($matches[1]);
+
+    return array_merge($baseforms, $wordbases);
 }
 
 function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
@@ -175,10 +193,9 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
       'fulfilled' => function ($response) use (&$extraWords) {
           $response = json_decode($response->getBody()->getContents(), true);
           if (count($response)) {
-              $baseforms = array_map(function ($item) {
-                  return $item['BASEFORM'];
-              }, $response);
-              $extraWords = array_values(array_merge($extraWords, $baseforms));
+              $baseforms = array_column($response, 'BASEFORM');
+              $wordbases = searchwp_finnish_base_forms_parse_wordbases(array_column($response, 'WORDBASES'));
+              $extraWords = array_merge($extraWords, $baseforms, $wordbases);
           }
       },
     ]);
