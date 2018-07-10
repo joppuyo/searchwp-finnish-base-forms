@@ -18,6 +18,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js and 
 4. Configure plugin in **Plugins** and **Settings** under **SearchWP Finnish Base Forms**
 
 == Changelog ==
+= 2.0.2 =
+* Add Travis to build process
+
 = 2.0.1 =
 * Fix crash due to missing parameter
 
