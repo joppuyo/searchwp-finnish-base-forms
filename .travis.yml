@@ -1,4 +1,13 @@
 language: php
 php:
   - '5.5.9'
-script: composer install
+script:
+  - composer install
+  - zip -r release.zip .
+deploy:
+  provider: releases
+  api_key: '$GITHUB_API_KEY'
+  file: "release.zip"
+  skip_cleanup: true
+  on:
+    tags: true
