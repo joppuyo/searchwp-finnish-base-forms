@@ -16,8 +16,8 @@ The CLI application is much faster because it doesn't have the overhead of perfo
 
 ## Installation
 
-1. Clone this plugin into **wp-content/plugins**
-2. Go to **wp-content/plugins/searchwp-finnish-base-forms** and run **composer install**
+1. **Download** latest version from the [releases](https://github.com/joppuyo/searchwp-finnish-base-forms/releases) tab
+2. **Unzip** the plugin into your `wp-content/plugins` directory
 3. **Activate** SearchWP Finnish Base Forms from your Plugins page
 
 ### Node.js web API

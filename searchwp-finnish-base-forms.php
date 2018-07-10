@@ -3,7 +3,7 @@
 Plugin Name: SearchWP Finnish Base Forms
 Plugin URI: https://github.com/joppuyo/searchwp-finnish-base-forms
 Description: SearchWP plugin to add Finnish base forms in search index
-Version: 2.0.2
+Version: 2.0.3
 Author: Johannes Siipola
 Author URI: https://siipo.la
 Text Domain: searchwp-finnish-base-forms
