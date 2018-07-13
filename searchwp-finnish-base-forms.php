@@ -171,7 +171,7 @@ function searchwp_finnish_base_forms_voikkospell($words)
     preg_match_all('/WORDBASES=(.+)$/m', $process->getOutput(), $matches);
     $wordbases = searchwp_finnish_base_forms_parse_wordbases($matches[1]);
 
-    return array_merge($baseforms, $wordbases);
+    return array_unique(array_merge($baseforms, $wordbases));
 }
 
 function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
@@ -195,7 +195,7 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
           if (count($response)) {
               $baseforms = array_column($response, 'BASEFORM');
               $wordbases = searchwp_finnish_base_forms_parse_wordbases(array_column($response, 'WORDBASES'));
-              $extraWords = array_merge($extraWords, $baseforms, $wordbases);
+              $extraWords = array_unique(array_merge($extraWords, $baseforms, $wordbases));
           }
       },
     ]);
@@ -231,7 +231,7 @@ add_action('wp_ajax_searchwp_finnish_base_forms_test', function () {
     } else {
         $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
     }
-    if ($baseforms === ['käsi']) {
+    if (count($baseforms) && $baseforms === ['käsi']) {
         wp_die();
     } else {
         wp_die('', '', ['response' => 500]);
