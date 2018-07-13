@@ -53,7 +53,7 @@ function searchwp_finnish_base_forms_settings_page()
     if (!empty($_POST)) {
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
-        update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
+        update_option('searchwp_finnish_base_forms_lemmatize_search_query', !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
         update_option('searchwp_finnish_base_forms_api_type', $_POST['api_type'] === 'web_api' ? 'web_api' : 'command_line');
         $updated = true;
     }
