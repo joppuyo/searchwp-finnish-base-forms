@@ -5,15 +5,10 @@
     } else {
       $('.js-searchwp-finnish-base-forms-api-url').show();
     }
-    if ($('input[name=lemmatize_search_query]:checked').length) {
-        $('.js-searchwp-finnish-base-forms-split-compound-words').show();
-    } else {
-        $('.js-searchwp-finnish-base-forms-split-compound-words').hide();
-    }
   };
   $(document).ready(function () {
     update();
-    $('input[name=api_type], input[name=lemmatize_search_query]').change(function () {
+    $('input[name=api_type]').change(function () {
       update();
     });
     $('.js-searchwp-finnish-base-forms-form').submit(function (event) {
