@@ -4,9 +4,25 @@
 
 SearchWP plugin to add Finnish base forms into search index using [Voikko](https://voikko.puimula.org/).
 
+## What does it do?
+
+This plugin allows you to add base forms of Finnish words in SearchWP search index. For example for word *koirillekin*, tokens *koirillekin* and *koira* are saved in the index during indexing. Learn mode by reading [this article](https://www.creuna.com/fi/ajankohtaista/wordpress-haku-searchwp-voikko/) (in Finnish).
+
+## Options
+
+### API type
+
 You can either use **Node.js application** to access Voikko over HTTP or use a locally installed **voikkospell command line application** to lemmatize the indexed terms. Special thanks to [siiptuo](https://github.com/siiptuo) for contributing voikkospell support for this plugin!
 
 The CLI application is much faster because it doesn't have the overhead of performing a HTTP request.
+
+### Add base forms to search query
+
+Enable this option to add base forms to search queries entered by users.
+
+### Split compound words
+
+Enable this option to split compound words during indexing (and for user queries if the above option is enabled). For example, the word *kerrostaloille* is transformed into tokens *kerrostaloille*,  *kerrostalo*, *kerros* and *talo* in the search index.
 
 ## Requirements
 
