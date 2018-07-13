@@ -32,9 +32,9 @@ if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_f
         return $terms;
     }, 10, 2);
 
-    // Double amount of maximum search terms just to be sure
+    // Double amount of maximum search terms just to be sure (the default is 6)
     add_filter('searchwp_max_search_terms', function ($maxTerms, $engine) {
-        return 12;
+        return get_option('searchwp_finnish_base_forms_split_compound_words') ? 24 : 12;
     }, 10, 2);
 
     // By default SearchWP will try AND logic first and after that OR logic if there are no results.
