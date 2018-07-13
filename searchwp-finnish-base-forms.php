@@ -28,12 +28,13 @@ if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_f
         $terms = searchwp_finnish_base_forms_lemmatize($terms);
         $terms = explode(' ', $terms);
         $terms = array_unique($terms);
+
         return $terms;
     }, 10, 2);
 
-    // Double amount of maximum search terms just to be sure
+    // Double amount of maximum search terms just to be sure (the default is 6)
     add_filter('searchwp_max_search_terms', function ($maxTerms, $engine) {
-        return 12;
+        return get_option('searchwp_finnish_base_forms_split_compound_words') ? 24 : 12;
     }, 10, 2);
 
     // By default SearchWP will try AND logic first and after that OR logic if there are no results.
@@ -53,7 +54,9 @@ function searchwp_finnish_base_forms_settings_page()
     if (!empty($_POST)) {
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
-        update_option('searchwp_finnish_base_forms_lemmatize_search_query', $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
+
+        update_option('searchwp_finnish_base_forms_lemmatize_search_query', !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
+        update_option('searchwp_finnish_base_forms_split_compound_words', !empty($_POST['split_compound_words']) && $_POST['split_compound_words']  === 'checked' ? 1 : 0);
         update_option('searchwp_finnish_base_forms_api_type', $_POST['api_type'] === 'web_api' ? 'web_api' : 'command_line');
         $updated = true;
     }
@@ -103,6 +106,15 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                <label for="lemmatize_search_query">Enabled</label>';
     echo '                </td>';
     echo '            </tr>';
+    echo '            <tr class="js-searchwp-finnish-base-forms-split-compound-words">';
+    echo '                <th scope="row">';
+    echo '                    <label>' . __('Split compound words', 'searchwp_finnish_base_forms') . '</label>';
+    echo '                </th>';
+    echo '                <td>';
+    echo '                <input type="checkbox" name="split_compound_words" id="split_compound_words" value="checked" ' . checked(get_option('searchwp_finnish_base_forms_split_compound_words'), '1', false) . ' />';
+    echo '                <label for="split_compound_words">Enabled</label>';
+    echo '                </td>';
+    echo '            </tr>';
     echo '            <tr>';
     echo '                <th colspan="2">';
     echo '                <span style="font-weight: 400">Note: if you enable "Add base forms to search query", Voikko will be called every time a search if performed, this might have performance implications.</span>';
@@ -145,6 +157,18 @@ function searchwp_finnish_base_forms_tokenize($str)
     return $arr[2];
 }
 
+function searchwp_finnish_base_forms_parse_wordbases($wordbases)
+{
+    $baseforms = [];
+    foreach ($wordbases as $wordbase) {
+        preg_match_all('/\(([^+].*?)\)/', $wordbase, $matches);
+        foreach ($matches[1] as $match) {
+            $baseforms[] = str_replace('=', '', $match);
+        }
+    }
+    return $baseforms;
+}
+
 function searchwp_finnish_base_forms_voikkospell($words)
 {
     $process = new \Symfony\Component\Process\Process('voikkospell -M', null, [
@@ -152,8 +176,18 @@ function searchwp_finnish_base_forms_voikkospell($words)
     ]);
     $process->setInput(implode($words, "\n"));
     $process->run();
-    preg_match_all('/BASEFORM=(.*)$/m', $process->getOutput(), $matches);
-    return $matches[1];
+
+    preg_match_all('/BASEFORM=(.+)$/m', $process->getOutput(), $matches);
+    $baseforms = $matches[1];
+
+    $wordbases = [];
+
+    if (get_option('searchwp_finnish_base_forms_split_compound_words')) {
+      preg_match_all('/WORDBASES=(.+)$/m', $process->getOutput(), $matches);
+      $wordbases = searchwp_finnish_base_forms_parse_wordbases($matches[1]);
+    }
+
+    return array_unique(array_merge($baseforms, $wordbases));
 }
 
 function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
@@ -161,6 +195,8 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
     $client = new \GuzzleHttp\Client();
 
     $extraWords = [];
+
+    $splitCompoundWords = get_option('searchwp_finnish_base_forms_split_compound_words');
 
     $requests = function () use ($client, $tokenized, $apiRoot) {
         foreach ($tokenized as $token) {
@@ -172,13 +208,15 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
 
     $pool = new \GuzzleHttp\Pool($client, $requests(), [
       'concurrency' => 10,
-      'fulfilled' => function ($response) use (&$extraWords) {
+      'fulfilled' => function ($response) use (&$extraWords, $splitCompoundWords) {
           $response = json_decode($response->getBody()->getContents(), true);
           if (count($response)) {
-              $baseforms = array_map(function ($item) {
-                  return $item['BASEFORM'];
-              }, $response);
-              $extraWords = array_values(array_merge($extraWords, $baseforms));
+              $baseforms = array_column($response, 'BASEFORM');
+              $wordbases = [];
+              if ($splitCompoundWords) {
+                $wordbases = searchwp_finnish_base_forms_parse_wordbases(array_column($response, 'WORDBASES'));
+              }
+              $extraWords = array_unique(array_merge($extraWords, $baseforms, $wordbases));
           }
       },
     ]);
@@ -214,7 +252,7 @@ add_action('wp_ajax_searchwp_finnish_base_forms_test', function () {
     } else {
         $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
     }
-    if ($baseforms === ['käsi']) {
+    if (count($baseforms) && $baseforms === ['käsi']) {
         wp_die();
     } else {
         wp_die('', '', ['response' => 500]);
