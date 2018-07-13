@@ -18,6 +18,10 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js or v
 4. Configure plugin in **Plugins** and **Settings** under **SearchWP Finnish Base Forms**
 
 == Changelog ==
+
+= 2.1.0 =
+* Add option to split compound words
+
 = 2.0.3 =
 * Update release file name and readme
 
