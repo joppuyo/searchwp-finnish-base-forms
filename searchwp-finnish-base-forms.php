@@ -28,6 +28,7 @@ if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_f
         $terms = searchwp_finnish_base_forms_lemmatize($terms);
         $terms = explode(' ', $terms);
         $terms = array_unique($terms);
+
         return $terms;
     }, 10, 2);
 
@@ -53,7 +54,9 @@ function searchwp_finnish_base_forms_settings_page()
     if (!empty($_POST)) {
         check_admin_referer('searchwp_finnish_base_forms');
         update_option('searchwp_finnish_base_forms_api_url', $_POST['api_url']);
+
         update_option('searchwp_finnish_base_forms_lemmatize_search_query', !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
+        update_option('searchwp_finnish_base_forms_split_compound_words', !empty($_POST['split_compound_words']) && $_POST['split_compound_words']  === 'checked' ? 1 : 0);
         update_option('searchwp_finnish_base_forms_api_type', $_POST['api_type'] === 'web_api' ? 'web_api' : 'command_line');
         $updated = true;
     }
@@ -101,6 +104,15 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                <td>';
     echo '                <input type="checkbox" name="lemmatize_search_query" id="lemmatize_search_query" value="checked" ' . checked(get_option('searchwp_finnish_base_forms_lemmatize_search_query'), '1', false) . ' />';
     echo '                <label for="lemmatize_search_query">Enabled</label>';
+    echo '                </td>';
+    echo '            </tr>';
+    echo '            <tr>';
+    echo '                <th scope="row">';
+    echo '                    <label>' . __('Split compound words', 'searchwp_finnish_base_forms') . '</label>';
+    echo '                </th>';
+    echo '                <td>';
+    echo '                <input type="checkbox" name="split_compound_words" id="split_compound_words" value="checked" ' . checked(get_option('searchwp_finnish_base_forms_split_compound_words'), '1', false) . ' />';
+    echo '                <label for="split_compound_words">Enabled</label>';
     echo '                </td>';
     echo '            </tr>';
     echo '            <tr>';
@@ -168,8 +180,12 @@ function searchwp_finnish_base_forms_voikkospell($words)
     preg_match_all('/BASEFORM=(.+)$/m', $process->getOutput(), $matches);
     $baseforms = $matches[1];
 
-    preg_match_all('/WORDBASES=(.+)$/m', $process->getOutput(), $matches);
-    $wordbases = searchwp_finnish_base_forms_parse_wordbases($matches[1]);
+    $wordbases = [];
+
+    if (get_option('searchwp_finnish_base_forms_split_compound_words')) {
+      preg_match_all('/WORDBASES=(.+)$/m', $process->getOutput(), $matches);
+      $wordbases = searchwp_finnish_base_forms_parse_wordbases($matches[1]);
+    }
 
     return array_unique(array_merge($baseforms, $wordbases));
 }
@@ -179,6 +195,8 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
     $client = new \GuzzleHttp\Client();
 
     $extraWords = [];
+
+    $splitCompoundWords = get_option('searchwp_finnish_base_forms_split_compound_words');
 
     $requests = function () use ($client, $tokenized, $apiRoot) {
         foreach ($tokenized as $token) {
@@ -190,11 +208,14 @@ function searchwp_finnish_base_forms_web_api($tokenized, $apiRoot)
 
     $pool = new \GuzzleHttp\Pool($client, $requests(), [
       'concurrency' => 10,
-      'fulfilled' => function ($response) use (&$extraWords) {
+      'fulfilled' => function ($response) use (&$extraWords, $splitCompoundWords) {
           $response = json_decode($response->getBody()->getContents(), true);
           if (count($response)) {
               $baseforms = array_column($response, 'BASEFORM');
-              $wordbases = searchwp_finnish_base_forms_parse_wordbases(array_column($response, 'WORDBASES'));
+              $wordbases = [];
+              if ($splitCompoundWords) {
+                $wordbases = searchwp_finnish_base_forms_parse_wordbases(array_column($response, 'WORDBASES'));
+              }
               $extraWords = array_unique(array_merge($extraWords, $baseforms, $wordbases));
           }
       },
