@@ -106,7 +106,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                <label for="lemmatize_search_query">Enabled</label>';
     echo '                </td>';
     echo '            </tr>';
-    echo '            <tr>';
+    echo '            <tr class="js-searchwp-finnish-base-forms-split-compound-words">';
     echo '                <th scope="row">';
     echo '                    <label>' . __('Split compound words', 'searchwp_finnish_base_forms') . '</label>';
     echo '                </th>';
