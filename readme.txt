@@ -19,6 +19,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js or v
 
 == Changelog ==
 
+= 2.2.0 =
+* Add option to use bundled voikkospell binary on Linux systems
+
 = 2.1.1 =
 * Always show split compound words option in settings
 
