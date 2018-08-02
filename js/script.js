@@ -1,6 +1,6 @@
 (function ($) {
   var update = function () {
-    if ($('input[name=api_type]:checked').val() === 'command_line') {
+    if ($('input[name=api_type]:checked').val() === 'binary' || $('input[name=api_type]:checked').val() === 'command_line') {
       $('.js-searchwp-finnish-base-forms-api-url').hide();
     } else {
       $('.js-searchwp-finnish-base-forms-api-url').show();
@@ -18,8 +18,8 @@
       var data = {
         action: 'searchwp_finnish_base_forms_test',
       };
-      if ($('input[name=api_type]:checked').val() === 'command_line') {
-        data.api_type = 'command_line';
+      if ($('input[name=api_type]:checked').val() === 'command_line' || $('input[name=api_type]:checked').val() === 'binary') {
+        data.api_type = $('input[name=api_type]:checked').val();
       } else {
         data.api_type = 'web_api';
         data.api_root = $('input[name=api_url]').val();

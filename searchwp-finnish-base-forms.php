@@ -16,13 +16,13 @@ if (file_exists(__DIR__ . '/vendor')) {
     require 'vendor/autoload.php';
 }
 
-if (get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_finnish_base_forms_api_type') === 'command_line') {
+if (get_option('searchwp_finnish_base_forms_api_url') || in_array(get_option('searchwp_finnish_base_forms_api_type'), ['binary', 'command_line'])) {
     add_filter('searchwp_indexer_pre_process_content', function ($content) {
         return searchwp_finnish_base_forms_lemmatize($content);
     });
 }
 
-if ((get_option('searchwp_finnish_base_forms_api_url') || get_option('searchwp_finnish_base_forms_api_type') === 'command_line') && get_option('searchwp_finnish_base_forms_lemmatize_search_query')) {
+if ((get_option('searchwp_finnish_base_forms_api_url') || in_array(get_option('searchwp_finnish_base_forms_api_type'), ['binary', 'command_line'])) && get_option('searchwp_finnish_base_forms_lemmatize_search_query')) {
     add_filter('searchwp_pre_search_terms', function ($terms, $engine) {
         $terms = implode(' ', $terms);
         $terms = searchwp_finnish_base_forms_lemmatize($terms);
@@ -57,12 +57,12 @@ function searchwp_finnish_base_forms_settings_page()
 
         update_option('searchwp_finnish_base_forms_lemmatize_search_query', !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
         update_option('searchwp_finnish_base_forms_split_compound_words', !empty($_POST['split_compound_words']) && $_POST['split_compound_words']  === 'checked' ? 1 : 0);
-        update_option('searchwp_finnish_base_forms_api_type', $_POST['api_type'] === 'web_api' ? 'web_api' : 'command_line');
+        update_option('searchwp_finnish_base_forms_api_type', in_array($_POST['api_type'], ['binary', 'command_line', 'web_api']) ? $_POST['api_type'] : 'command_line');
         $updated = true;
     }
 
     $apiUrl = get_option('searchwp_finnish_base_forms_api_url');
-    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
+    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'binary';
 
     echo '<div class="wrap">';
     echo '    <h1>' . __('SearchWP Finnish Base Forms', 'searchwp_finnish_base_forms') . '</h1>';
@@ -80,6 +80,7 @@ function searchwp_finnish_base_forms_settings_page()
     echo '                    <label for="api_url">' . __('API type', 'searchwp_finnish_base_forms') . '</label>';
     echo '                </th>';
     echo '                <td>';
+    echo '                <p><input type="radio" id="binary" name="api_type" value="binary" ' . checked($apiType, 'binary', false) . '><label for="binary">Voikko binary (bundled)</label></p>';
     echo '                <p><input type="radio" id="web_api" name="api_type" value="web_api" ' . checked($apiType, 'web_api', false) . '><label for="web_api">Web API</label></p>';
     echo '                <p><input type="radio" id="command_line" name="api_type" value="command_line" ' . checked($apiType, 'command_line', false) . '><label for="command_line">Voikko command line</label></p>';
     echo '                </td>';
@@ -169,13 +170,26 @@ function searchwp_finnish_base_forms_parse_wordbases($wordbases)
     return $baseforms;
 }
 
-function searchwp_finnish_base_forms_voikkospell($words)
+function searchwp_finnish_base_forms_voikkospell($words, $apiType)
 {
-    $process = new \Symfony\Component\Process\Process('voikkospell -M', null, [
-      'LANG' => 'en_US.UTF-8'
+    $binaryPath = null;
+    if ($apiType === 'binary') {
+        $path = plugin_dir_path(__FILE__);
+        $binaryPath = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+    } else {
+        $binaryPath = 'voikkospell';
+    }
+
+    $process = new \Symfony\Component\Process\Process("$binaryPath -M", null, [
+      'LANG' => 'C.UTF-8',
+      'LC_ALL' => 'C.UTF-8',
     ]);
     $process->setInput(implode($words, "\n"));
     $process->run();
+
+    if ($process->getErrorOutput()) {
+        throw new Exception($process->getErrorOutput());
+    }
 
     preg_match_all('/BASEFORM=(.+)$/m', $process->getOutput(), $matches);
     $baseforms = $matches[1];
@@ -231,10 +245,10 @@ function searchwp_finnish_base_forms_lemmatize($content)
 {
     $tokenized = searchwp_finnish_base_forms_tokenize(strip_tags($content));
 
-    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
+    $apiType = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'binary';
 
-    if ($apiType === 'command_line') {
-        $extraWords = searchwp_finnish_base_forms_voikkospell($tokenized);
+    if ($apiType === 'binary' || $apiType === 'command_line') {
+        $extraWords = searchwp_finnish_base_forms_voikkospell($tokenized, $apiType);
     } else {
         $apiRoot = get_option('searchwp_finnish_base_forms_api_url');
         $extraWords = searchwp_finnish_base_forms_web_api($tokenized, $apiRoot);
@@ -247,8 +261,9 @@ function searchwp_finnish_base_forms_lemmatize($content)
 
 add_action('wp_ajax_searchwp_finnish_base_forms_test', function () {
     $apiType = $_POST['api_type'];
-    if ($apiType === 'command_line') {
-        $baseforms = searchwp_finnish_base_forms_voikkospell(['käden']);
+    if ($apiType === 'binary' || $apiType === 'command_line') {
+        $baseforms = searchwp_finnish_base_forms_voikkospell(['käden'], $apiType);
+        dd($baseforms);
     } else {
         $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
     }
