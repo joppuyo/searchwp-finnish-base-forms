@@ -19,6 +19,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js or v
 
 == Changelog ==
 
+= 2.2.2 =
+* Fix locale query logic
+
 = 2.2.1 =
 * Get UTF-8 locale from system
 * Ensure binary has correct permissions
