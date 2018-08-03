@@ -175,6 +175,7 @@ function searchwp_finnish_base_forms_voikkospell($words, $apiType)
     $binaryPath = null;
     if ($apiType === 'binary') {
         $path = plugin_dir_path(__FILE__);
+        ensure_permissions("{$path}bin/voikkospell");
         $binaryPath = "{$path}bin/voikkospell -p {$path}bin/dictionary";
     } else {
         $binaryPath = 'voikkospell';
@@ -290,3 +291,10 @@ add_action('admin_enqueue_scripts', function ($hook) {
     }
     wp_enqueue_script('searchwp-finnish-base-forms-js', plugin_dir_url(__FILE__) . '/js/script.js');
 });
+
+function ensure_permissions($path) {
+    $permissions = substr(sprintf('%o', fileperms($path)), -4);
+    if ($permissions !== '0755') {
+        chmod($path, 0755);
+    }
+}
