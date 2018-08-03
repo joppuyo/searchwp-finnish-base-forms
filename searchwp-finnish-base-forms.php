@@ -263,7 +263,6 @@ add_action('wp_ajax_searchwp_finnish_base_forms_test', function () {
     $apiType = $_POST['api_type'];
     if ($apiType === 'binary' || $apiType === 'command_line') {
         $baseforms = searchwp_finnish_base_forms_voikkospell(['käden'], $apiType);
-        dd($baseforms);
     } else {
         $baseforms = searchwp_finnish_base_forms_web_api(['käden'], $_POST['api_root']);
     }
