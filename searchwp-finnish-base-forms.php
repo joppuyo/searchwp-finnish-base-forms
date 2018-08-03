@@ -183,7 +183,7 @@ function searchwp_finnish_base_forms_voikkospell($words, $apiType)
 
     $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
     $process->run();
-    $locale = trim($process->getOutput());
+    $locale = strtok($process->getOutput(), "\n");
 
     $process = new \Symfony\Component\Process\Process("$binaryPath -M", null, [
       'LANG' => $locale,
