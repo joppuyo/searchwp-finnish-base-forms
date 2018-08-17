@@ -19,6 +19,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires Node.js or v
 
 == Changelog ==
 
+= 2.2.4 =
+* Improve plugin structure, unify code with Relevanssi version
+
 = 2.2.3 =
 * Smaller binary without debug symbols
 
