@@ -70,17 +70,17 @@ class FinnishBaseForms {
         if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_indexer_pre_process_content', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
                 });
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_post_content_before_tokenize', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
                 });
                 add_filter('relevanssi_post_title_before_tokenize', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
                 });
                 add_filter('relevanssi_custom_field_value', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? [$this->lemmatize($content[0])] :  [$content];
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? [$this->lemmatize($content[0])] : [$content];
                 });
             }
         }
