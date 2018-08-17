@@ -6,5 +6,5 @@ Description: suomi (perussanasto)
 SM-Version: 2.2
 SM-Patchinfo: 
 Build-Config: GENLEX_OPTS= EXTRA_LEX=
-Build-Date: Thu, 02 Aug 2018 14:28:41 +0000
+Build-Date: Sat, 04 Aug 2018 18:51:58 +0000
 Morphology-Backend: finnishVfst
