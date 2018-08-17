@@ -57,21 +57,30 @@ class FinnishBaseForms {
             wp_enqueue_script("{$this->plugin_slug}-finnish-base-forms-js", plugin_dir_url(__FILE__) . '/js/script.js');
         });
 
+        add_action('searchwp_index_post', function ($post) {
+            // Polylang compat
+            if (function_exists('pll_get_post_language')) {
+                $language = pll_get_post_language($post->ID);
+                $this->debug($language);
+                update_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish", $language === 'fi');
+            }
+        });
+
         // If plugin is installed, pass all content through lemmatization process
         if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_indexer_pre_process_content', function ($content) {
-                    return $this->lemmatize($content);
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
                 });
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_post_content_before_tokenize', function ($content) {
-                    return $this->lemmatize($content);
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
                 });
                 add_filter('relevanssi_post_title_before_tokenize', function ($content) {
-                    return $this->lemmatize($content);
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) :  $content;
                 });
                 add_filter('relevanssi_custom_field_value', function ($content) {
-                    return [$this->lemmatize($content[0])];
+                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? [$this->lemmatize($content[0])] :  [$content];
                 });
             }
         }
@@ -367,6 +376,13 @@ class FinnishBaseForms {
         if ($permissions !== '0755') {
             chmod($path, 0755);
         }
+    }
+
+    /**
+     * @param mixed $message
+     */
+    function debug($message) {
+        error_log(print_r($message, true));
     }
 
 }
