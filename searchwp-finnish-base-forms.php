@@ -61,7 +61,6 @@ class FinnishBaseForms {
             // Polylang compat
             if (function_exists('pll_get_post_language')) {
                 $language = pll_get_post_language($post->ID);
-                $this->debug($language);
                 update_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish", $language === 'fi');
             }
         });
@@ -73,15 +72,27 @@ class FinnishBaseForms {
                     return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
                 });
             } else if ($this->plugin_slug === 'relevanssi') {
-                add_filter('relevanssi_post_content_before_tokenize', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
-                });
-                add_filter('relevanssi_post_title_before_tokenize', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
-                });
-                add_filter('relevanssi_custom_field_value', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? [$this->lemmatize($content[0])] : [$content];
-                });
+                add_filter('relevanssi_post_content_before_tokenize', function ($content, $post) {
+                    // Polylang compat
+                    if (function_exists('pll_get_post_language') && pll_get_post_language($post->ID) !== 'fi') {
+                        return $content;
+                    }
+                    return $this->lemmatize($content);
+                }, 10, 2);
+                add_filter('relevanssi_post_title_before_tokenize', function ($content, $post) {
+                    // Polylang compat
+                    if (function_exists('pll_get_post_language') && pll_get_post_language($post->ID) !== 'fi') {
+                        return $content;
+                    }
+                    return $this->lemmatize($content);
+                }, 10, 2);
+                add_filter('relevanssi_custom_field_value', function ($content, $post) {
+                    // Polylang compat
+                    if (function_exists('pll_get_post_language') && pll_get_post_language($post->ID) !== 'fi') {
+                        return [$content];
+                    }
+                    return [$this->lemmatize($content[0])];
+                }, 10, 2);
             }
         }
 
