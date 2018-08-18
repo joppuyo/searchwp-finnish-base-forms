@@ -89,6 +89,12 @@ class FinnishBaseForms {
         if ((get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_pre_search_terms', function ($terms, $engine) {
+
+                    // Polylang compat
+                    if (function_exists('pll_current_language') && pll_current_language() !== 'fi') {
+                        return $terms;
+                    }
+
                     $terms = implode(' ', $terms);
                     $terms = $this->lemmatize($terms);
                     $terms = explode(' ', $terms);
