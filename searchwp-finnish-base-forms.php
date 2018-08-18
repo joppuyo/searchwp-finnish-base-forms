@@ -99,6 +99,10 @@ class FinnishBaseForms {
 
                 // Double amount of maximum search terms just to be sure (the default is 6)
                 add_filter('searchwp_max_search_terms', function ($max_terms, $engine) {
+                    // Polylang compat
+                    if (function_exists('pll_current_language') && pll_current_language() !== 'fi') {
+                        return $max_terms;
+                    }
                     return get_option('searchwp_finnish_base_forms_split_compound_words') ? 24 : 12;
                 }, 10, 2);
 
@@ -107,7 +111,14 @@ class FinnishBaseForms {
                 add_filter('searchwp_and_logic', '__return_false');
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_search_filters', function ($parameters) {
+
+                    // Polylang compat
+                    if (function_exists('pll_current_language') && pll_current_language() !== 'fi') {
+                        return $parameters;
+                    }
+
                     $parameters['q'] = $this->lemmatize($parameters['q']);
+
                     return $parameters;
                 });
             }
