@@ -3,6 +3,7 @@ php:
   - '5.5.9'
 script:
   - composer install
+  - mkdir -p searchwp-finnish-base-forms
   - cp -r * searchwp-finnish-base-forms
   - zip -r searchwp-finnish-base-forms.zip searchwp-finnish-base-forms -x \*.git\*
 deploy:
