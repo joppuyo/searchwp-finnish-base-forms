@@ -170,7 +170,7 @@ class FinnishBaseForms {
      */
     private function lemmatize($content)
     {
-        $tokenized = $this->tokenize(strip_tags($content));
+        $tokenized = $this->tokenize(strip_tags(html_entity_decode($content)));
 
         $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'binary';
 
