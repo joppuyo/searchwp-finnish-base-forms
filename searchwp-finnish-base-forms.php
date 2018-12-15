@@ -421,6 +421,209 @@ class FinnishBaseForms {
         error_log(print_r($message, true));
     }
 
+    /**
+     * @param WP_Post $post
+     * @param array $options
+     */
+    function get_excerpt($post, $options = [])
+    {
+
+        $defaults = [
+            'length' => 300,
+            'default_excerpt' => function ($post) {
+                if (strlen($post->post_excerpt)) {
+                    return $post->post_excerpt;
+                }
+                return $post->post_content;
+            }
+        ];
+
+        $options = array_merge($defaults, $options);
+
+        $query = explode(' ', $this->lemmatize(mb_strtolower(get_search_query())));
+        $fields = get_post_meta($post->ID, '');
+        //dump($fields);
+        foreach ($fields as $name => $field) {
+            $matches = $this->get_matches($field[0], $query);
+            if (count($matches)) {
+                // Sort matches by length, so that longest match is highlighted.
+                usort($matches, function ($a, $b) {
+                    return strlen($b) - strlen($a);
+                });
+                $field[0] = strip_tags($field[0]);
+                $result = $this->do_it($field[0], $matches, $options['length']);
+                $result = preg_replace("/" . implode('|', array_map('preg_quote', $matches)) . "/i", '<strong>$0</strong>', $result);
+                return $result;
+                break;
+            }
+        }
+        return Stringy\Stringy::create($options['default_excerpt']($post))
+            ->safeTruncate($options['length']);
+    }
+
+    /**
+     * Tuomas Siipola <siiptuo@kapsi.fi>
+     * @param string $haystack
+     * @param array $needles
+     * @return string
+     */
+    function find_spans($haystack, $needles)
+    {
+        return preg_replace_callback(
+            '/(.*?)(' . implode('|', array_map('preg_quote', $needles)) . ')?/ui',
+            function ($matches) {
+                $ws = str_repeat(' ', mb_strlen($matches[1]));
+                return isset($matches[2]) ? $ws . '[' . str_repeat(' ', mb_strlen($matches[2]) - 2) . ']' : $ws;
+            },
+            $haystack
+        );
+    }
+
+    /**
+     * Tuomas Siipola <siiptuo@kapsi.fi>
+     * @param string $spans
+     * @param int $window_size
+     * @return int
+     */
+    function find_best_window($spans, $window_size)
+    {
+        $words = 0;
+        for ($i = 0; $i < $window_size; $i++) {
+            if ($spans[$i] === ']') {
+                $words++;
+            }
+        }
+        $max_start = 0;
+        $max_end = 0;
+        $max_words = $words;
+        $in_max = false;
+        for ($i = 0; $i < strlen($spans) - $window_size; $i++) {
+            if ($spans[$i] === '[') {
+                $words--;
+            }
+            if ($spans[$i + $window_size] === ']') {
+                $words++;
+            }
+            if ($words > $max_words) {
+                $max_start = $max_end = $i + 1;
+                $max_words = $words;
+                $in_max = true;
+            } elseif ($in_max && $words === $max_words) {
+                $max_end++;
+            } else {
+                $in_max = false;
+            }
+        }
+        if ($max_start === 0) {
+            return $max_start;
+        } elseif ($in_max) {
+            return $max_end;
+        } else {
+            return $max_start + intdiv($max_end - $max_start, 2);
+        }
+    }
+
+    /**
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
+     * @param string $text
+     * @param array $terms
+     * @param int $window_size
+     * @return string
+     */
+    function do_it($text, $terms, $window_size)
+    {
+        if (mb_strlen($text) <= $window_size) {
+            return $text;
+        }
+        $spans = $this->find_spans($text, $terms);
+        $window_start = $this->find_best_window($spans, $window_size);
+        if ($window_start === 0) {
+            return trim(mb_substr($text, $window_start, $window_size)) . '...';
+        } elseif ($window_start === mb_strlen($text) - $window_size) {
+            return '...' . trim(mb_substr($text, $window_start, $window_size));
+        } else {
+            return '...' . trim(mb_substr($text, $window_start, $window_size)) . '...';
+        }
+    }
+
+    /**
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
+     * @param $value
+     * @param array $query
+     * @return array
+     */
+    function get_matches($value, $query)
+    {
+
+        $split_compound_words = get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words");
+
+        $tokenized = $this->tokenize(mb_strtolower($value));
+
+        $matches = [];
+
+        $api_type = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
+
+        if ($api_type === 'command_line' || $api_type === 'binary') {
+
+            foreach ($tokenized as $token) {
+                if (in_array(mb_strtolower($token), $query)) {
+                    array_push($matches, $token);
+                }
+            }
+
+            $binaryPath = null;
+            if ($api_type === 'binary') {
+                $path = plugin_dir_path(__FILE__);
+                $this->ensure_permissions("{$path}bin/voikkospell");
+                $binaryPath = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+            } else {
+                $binaryPath = 'voikkospell';
+            }
+
+            $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
+            $process->run();
+            $locale = strtok($process->getOutput(), "\n");
+
+            $process = new \Symfony\Component\Process\Process("$binaryPath -M", null, [
+                'LANG' => $locale,
+                'LC_ALL' => $locale,
+            ]);
+            $process->setInput(implode($tokenized, "\n"));
+            $process->run();
+
+            preg_match_all('/A\((.*)\).*BASEFORM=(.*)$/m', $process->getOutput(), $matches2);
+
+            $words = [];
+
+            for ($i = 0; $i < count($matches2[0]); $i++) {
+                $words[$matches2[1][$i]][] = $matches2[2][$i];
+            }
+
+            if ($split_compound_words) {
+                preg_match_all('/A\((.*)\).*WORDBASES=(.+)$/m', $process->getOutput(), $matches3);
+                for ($i = 0; $i < count($matches3[0]); $i++) {
+                    $wordbases = $this->parse_wordbases([$matches3[2][$i]]);
+                    $words[$matches3[1][$i]] = array_merge($words[$matches3[1][$i]], $wordbases);
+                }
+            }
+
+            foreach ($words as $original => $tokens) {
+                if (array_intersect($tokens, $query)) {
+                    array_push($matches, $original);
+                }
+            }
+
+        }
+
+        return $matches;
+
+    }
+
 }
 
-new FinnishBaseForms();
+$finnish_base_forms = new FinnishBaseForms();
+
+function searchwp_finish_base_forms_get_excerpt($post, $options) {
+    global $finnish_base_forms;
+    return $finnish_base_forms->get_excerpt($post, $options);
+}
