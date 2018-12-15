@@ -28,6 +28,14 @@ class FinnishBaseForms {
 
     public function __construct()
     {
+        $update_checker = Puc_v4_Factory::buildUpdateChecker(
+            'https://github.com/joppuyo/searchwp-finnish-base-forms',
+            __FILE__,
+            "{$this->plugin_slug}-finnish-base-forms"
+        );
+
+        $update_checker->getVcsApi()->enableReleaseAssets();
+
         // Add settings link on the plugin page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
             $settings_link = "<a href=\"options-general.php?page={$this->plugin_slug}_finnish_base_forms\">" . __('Settings', "{$this->plugin_slug}_finnish_base_forms") . '</a>';
