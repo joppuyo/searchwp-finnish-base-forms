@@ -19,6 +19,10 @@ SearchWP plugin to add Finnish base forms in search index. Requires SearchWP 2.5
 
 == Changelog ==
 
+= 2.3.0 =
+* Compatibility with Polylang
+* Plugin auto-update functionality
+
 = 2.2.4 =
 * Improve plugin structure, unify code with Relevanssi version
 
