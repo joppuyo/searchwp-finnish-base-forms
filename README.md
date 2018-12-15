@@ -8,6 +8,8 @@ SearchWP plugin to add Finnish base forms into search index using [Voikko](https
 
 This plugin allows you to add base forms of Finnish words in SearchWP search index. For example for word *koirillekin*, tokens *koirillekin* and *koira* are saved in the index during indexing. Learn mode by reading [this article](https://www.creuna.com/fi/ajankohtaista/wordpress-haku-searchwp-voikko/) (in Finnish).
 
+This plugin is compatible with Polylang. If you have Polylang installed, it will only process content written in Finnish.
+
 ## Options
 
 ### API type
