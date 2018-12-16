@@ -441,9 +441,48 @@ class FinnishBaseForms {
         $options = array_merge($defaults, $options);
 
         $query = explode(' ', $this->lemmatize(mb_strtolower(get_search_query())));
-        $fields = get_post_meta($post->ID, '');
-        //dump($fields);
+
+        global $searchwp;
+
+        // TODO: maybe find a better way to get this?
+        $searchwp_engine = $searchwp->diagnostics[0]['engine'];
+
+        $searchwp_settings = $searchwp->settings;
+        $post_type = $post->post_type;
+
+        $post_type_settings = $searchwp_settings['engines'][$searchwp_engine][$post_type];
+
+        $fields = get_post_meta($post->ID);
+
+        if (!empty($post_type_settings['weights']['content'])) {
+            array_push($fields, ['wp_content' => $post->post_content]);
+        }
+
+        if (!empty($post_type_settings['weights']['excerpt'])) {
+            array_push($fields, ['wp_excerpt' => $post->post_content]);
+        }
+
+        $keys = ['wp_excerpt', 'wp_content'];
+
+        // TODO: maybe take weight into account?
+        foreach ($post_type_settings['weights']['cf'] as $meta_key) {
+            array_push($keys, str_replace('%', '*', $meta_key['metakey']));
+        }
+
         foreach ($fields as $name => $field) {
+
+            // TODO: make this more functional
+            $match = false;
+            foreach ($keys as $key) {
+                if (fnmatch($key, $name)) {
+                    $match = true;
+                }
+            }
+
+            if (!$match) {
+                continue;
+            }
+
             $matches = $this->get_matches($field[0], $query);
             if (count($matches)) {
                 // Sort matches by length, so that longest match is highlighted.
