@@ -170,7 +170,7 @@ class FinnishBaseForms {
      */
     private function lemmatize($content)
     {
-        $tokenized = $this->tokenize(strip_tags(html_entity_decode($content)));
+        $tokenized = $this->tokenize($content);
 
         $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'binary';
 
@@ -198,6 +198,8 @@ class FinnishBaseForms {
      */
     function tokenize($str)
     {
+        $str = html_entity_decode($str);
+        $str = strip_tags($str);
         $arr = [];
         // for the character classes
         // see http://php.net/manual/en/regexp.reference.unicode.php
@@ -456,11 +458,11 @@ class FinnishBaseForms {
         $fields = get_post_meta($post->ID);
 
         if (!empty($post_type_settings['weights']['content'])) {
-            array_push($fields, ['wp_content' => $post->post_content]);
+            $fields['wp_content'][0] = $post->post_content;
         }
 
         if (!empty($post_type_settings['weights']['excerpt'])) {
-            array_push($fields, ['wp_excerpt' => $post->post_content]);
+            $fields['wp_excerpt'][0] = $post->post_excerpt;
         }
 
         $keys = ['wp_excerpt', 'wp_content'];
@@ -475,7 +477,7 @@ class FinnishBaseForms {
             // TODO: make this more functional
             $match = false;
             foreach ($keys as $key) {
-                if (fnmatch($key, $name)) {
+                if ($key === $name || fnmatch($key, $name)) {
                     $match = true;
                 }
             }
@@ -485,6 +487,7 @@ class FinnishBaseForms {
             }
 
             $matches = $this->get_matches($field[0], $query);
+
             if (count($matches)) {
                 // Sort matches by length, so that longest match is highlighted.
                 usort($matches, function ($a, $b) {
