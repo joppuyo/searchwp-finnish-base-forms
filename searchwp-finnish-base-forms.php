@@ -435,12 +435,13 @@ class FinnishBaseForms {
                     return $post->post_excerpt;
                 }
                 return $post->post_content;
-            }
+            },
+            'query' => get_search_query(),
         ];
 
         $options = array_merge($defaults, $options);
 
-        $query = explode(' ', $this->lemmatize(mb_strtolower(get_search_query())));
+        $query = explode(' ', $this->lemmatize(mb_strtolower($options['query'])));
 
         global $searchwp;
 
