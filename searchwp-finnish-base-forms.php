@@ -432,7 +432,7 @@ class FinnishBaseForms {
 
         $defaults = [
             'length' => 300,
-            'default_excerpt' => function ($post) {
+            'fallback' => function ($post) {
                 if (strlen($post->post_excerpt)) {
                     return $post->post_excerpt;
                 }
