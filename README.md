@@ -30,6 +30,18 @@ Enable this option to add base forms to search queries entered by users.
 
 Enable this option to split compound words during indexing (and for user queries if the above option is enabled). For example, the word *kerrostaloille* is transformed into tokens *kerrostaloille*,  *kerrostalo*, *kerros* and *talo* in the search index.
 
+## Search result excerpts
+
+It's possible to generate Google-style search result excerpts where the keywords are highlighted using `searchwp_finish_base_forms_get_excerpt($post, $options)` function. It takes the following parameters:
+
+* Post you want to create excerpt for
+* Array of options
+  * `length`: length of the excerpt, 300 characters by default
+  * `query`: current search query, by default it's `get_search_query()` 
+  * `fallback` Anonymous method that generates excerpt to display if the search query is not found in the post content, by default this will use 'excerpt' field and fall back to 'content' field. The text will be truncated according to `length`
+  
+  This function will automatically check all fields for the search terms that have been configured in SearchWP settings.
+    
 ## Requirements
 
 * SearchWP 2.5 or later
