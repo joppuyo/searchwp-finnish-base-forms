@@ -505,7 +505,7 @@ class FinnishBaseForms {
     }
 
     /**
-     * Tuomas Siipola <siiptuo@kapsi.fi>
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param string $haystack
      * @param array $needles
      * @return string
@@ -523,7 +523,7 @@ class FinnishBaseForms {
     }
 
     /**
-     * Tuomas Siipola <siiptuo@kapsi.fi>
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param string $spans
      * @param int $window_size
      * @return int
