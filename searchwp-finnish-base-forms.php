@@ -604,7 +604,7 @@ class FinnishBaseForms {
 
         $matches = [];
 
-        $api_type = get_option('searchwp_finnish_base_forms_api_type') ? get_option('searchwp_finnish_base_forms_api_type') : 'web_api';
+        $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'web_api';
 
         if ($api_type === 'command_line' || $api_type === 'binary') {
 
