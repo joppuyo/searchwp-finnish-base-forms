@@ -331,20 +331,20 @@ class FinnishBaseForms {
      */
     function voikkospell($words, $api_type)
     {
-        $binaryPath = null;
+        $binary_path = null;
         if ($api_type === 'binary') {
             $path = plugin_dir_path(__FILE__);
             $this->ensure_permissions("{$path}bin/voikkospell");
-            $binaryPath = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+            $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
         } else {
-            $binaryPath = 'voikkospell';
+            $binary_path = 'voikkospell';
         }
 
         $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
         $process->run();
         $locale = strtok($process->getOutput(), "\n");
 
-        $process = new \Symfony\Component\Process\Process("$binaryPath -M", null, [
+        $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
             'LANG' => $locale,
             'LC_ALL' => $locale,
         ]);
@@ -614,20 +614,20 @@ class FinnishBaseForms {
                 }
             }
 
-            $binaryPath = null;
+            $binary_path = null;
             if ($api_type === 'binary') {
                 $path = plugin_dir_path(__FILE__);
                 $this->ensure_permissions("{$path}bin/voikkospell");
-                $binaryPath = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+                $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
             } else {
-                $binaryPath = 'voikkospell';
+                $binary_path = 'voikkospell';
             }
 
             $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
             $process->run();
             $locale = strtok($process->getOutput(), "\n");
 
-            $process = new \Symfony\Component\Process\Process("$binaryPath -M", null, [
+            $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
                 'LANG' => $locale,
                 'LC_ALL' => $locale,
             ]);
