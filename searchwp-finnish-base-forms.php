@@ -500,7 +500,7 @@ class FinnishBaseForms {
                 break;
             }
         }
-        return Stringy\Stringy::create($options['default_excerpt']($post))
+        return Stringy\Stringy::create($options['fallback']($post))
             ->safeTruncate($options['length']);
     }
 
