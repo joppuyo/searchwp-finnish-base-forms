@@ -77,7 +77,11 @@ class FinnishBaseForms {
         if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_indexer_pre_process_content', function ($content) {
-                    return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
+                    // Polylang compat
+                    if (function_exists('pll_get_post_language')) {
+                        return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
+                    }
+                    return $this->lemmatize($content);
                 });
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_post_content_before_tokenize', function ($content, $post) {
