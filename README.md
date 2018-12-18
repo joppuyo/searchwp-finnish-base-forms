@@ -32,7 +32,7 @@ Enable this option to split compound words during indexing (and for user queries
 
 ## Search result excerpts
 
-It's possible to generate Google-style search result excerpts where the keywords are highlighted using `searchwp_finish_base_forms_get_excerpt($post, $options)` function. It takes the following parameters:
+It's possible to generate Google-style search result excerpts where the keywords are highlighted using `searchwp_finnish_base_forms_get_excerpt($post, $options)` function. It takes the following parameters:
 
 * Post you want to create excerpt for
 * Array of options

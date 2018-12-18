@@ -666,7 +666,7 @@ class FinnishBaseForms {
 
 $finnish_base_forms = new FinnishBaseForms();
 
-function searchwp_finish_base_forms_get_excerpt($post, $options = []) {
+function searchwp_finnish_base_forms_get_excerpt($post, $options = []) {
     global $finnish_base_forms;
     return $finnish_base_forms->get_excerpt($post, $options);
 }
