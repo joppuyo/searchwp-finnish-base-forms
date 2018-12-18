@@ -18,6 +18,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires SearchWP 2.5
 
 == Changelog ==
 
+= 3.0.0 =
+* Fix typo in function name
+
 = 2.4.0 =
 * Add function to generate search result excerpts
 
