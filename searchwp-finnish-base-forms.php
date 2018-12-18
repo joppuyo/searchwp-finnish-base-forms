@@ -492,15 +492,17 @@ class FinnishBaseForms {
                 continue;
             }
 
-            $matches = $this->get_matches($field[0], $query);
+            $matched_field = strip_tags(html_entity_decode($field[0]));
+
+            $matches = $this->get_matches($matched_field, $query);
 
             if (count($matches)) {
                 // Sort matches by length, so that longest match is highlighted.
                 usort($matches, function ($a, $b) {
                     return strlen($b) - strlen($a);
                 });
-                $field[0] = strip_tags($field[0]);
-                $result = $this->do_it($field[0], $matches, $options['length']);
+
+                $result = $this->do_it($matched_field, $matches, $options['length']);
                 $result = preg_replace("/" . implode('|', array_map('preg_quote', $matches)) . "/i", '<strong>$0</strong>', $result);
                 return $result;
                 break;
