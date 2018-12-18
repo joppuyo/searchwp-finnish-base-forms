@@ -468,8 +468,10 @@ class FinnishBaseForms {
         $keys = ['wp_excerpt', 'wp_content'];
 
         // TODO: maybe take weight into account?
-        foreach ($post_type_settings['weights']['cf'] as $meta_key) {
-            array_push($keys, str_replace('%', '*', $meta_key['metakey']));
+        if (!empty($post_type_settings['weights']['cf'])) {
+            foreach ($post_type_settings['weights']['cf'] as $meta_key) {
+                array_push($keys, str_replace('%', '*', $meta_key['metakey']));
+            }
         }
 
         foreach ($fields as $name => $field) {
