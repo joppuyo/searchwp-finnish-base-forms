@@ -18,6 +18,10 @@ SearchWP plugin to add Finnish base forms in search index. Requires SearchWP 2.5
 
 == Changelog ==
 
+= 3.0.2 =
+* Fix: Fix base forms not being indexed if Polylang is not installed
+* Fix: Improve HTML encoded text handling in excerpt generation
+
 = 3.0.1 =
 * Fix: Fixed notice if no custom fields have been defined
 * Fix: Fixed error when generating excerpt fallback
