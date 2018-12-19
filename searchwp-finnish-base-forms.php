@@ -508,7 +508,7 @@ class FinnishBaseForms {
                 break;
             }
         }
-        return Stringy\Stringy::create($options['fallback']($post))
+        return (string) Stringy\Stringy::create($options['fallback']($post))
             ->safeTruncate($options['length']);
     }
 
