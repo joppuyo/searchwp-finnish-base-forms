@@ -483,7 +483,8 @@ class FinnishBaseForms {
             // TODO: make this more functional
             $match = false;
             foreach ($keys as $key) {
-                if ($key === $name || fnmatch($key, $name)) {
+                // searchwpcfdefault is special case for "any custom field"
+                if ($key === $name || fnmatch($key, $name) || $key === 'searchwpcfdefault') {
                     $match = true;
                 }
             }
