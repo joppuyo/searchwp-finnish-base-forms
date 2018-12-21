@@ -18,6 +18,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires SearchWP 2.5
 
 == Changelog ==
 
+= 3.0.4 =
+* Fix: Add handling for “any custom field” special case when generating excerpts
+
 = 3.0.3 =
 * Fix: Cast default excerpt to a string
 
