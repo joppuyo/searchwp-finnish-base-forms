@@ -18,13 +18,24 @@ if (file_exists(__DIR__ . '/vendor')) {
     require 'vendor/autoload.php';
 }
 
-class FinnishBaseForms {
+class FinnishBaseForms
+{
 
     // This is used in the admin UI
     private $plugin_name = 'SearchWP';
 
     // This is used for option keys etc.
     private $plugin_slug = 'searchwp';
+
+    /**
+     * @param mixed $message
+     */
+    public static function debug($message)
+    {
+        if (defined('WP_DEBUG') && WP_DEBUG === true) {
+            error_log(print_r($message, true));
+        }
+    }
 
     public function __construct()
     {
@@ -119,7 +130,7 @@ class FinnishBaseForms {
                     }
 
                     $terms = implode(' ', $terms);
-                    $terms = $this->lemmatize($terms);
+                    $terms = $this->lemmatize_replace($terms);
                     $terms = explode(' ', $terms);
                     $terms = array_unique($terms);
 
@@ -137,7 +148,7 @@ class FinnishBaseForms {
 
                 // By default SearchWP will try AND logic first and after that OR logic if there are no results.
                 // Because we have the same search term multiple times, we want to always use OR logic
-                add_filter('searchwp_and_logic', '__return_false');
+                //add_filter('searchwp_and_logic', '__return_false');
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_search_filters', function ($parameters) {
 
@@ -235,7 +246,7 @@ class FinnishBaseForms {
             update_option("{$this->plugin_slug}_finnish_base_forms_api_url", $_POST['api_url']);
 
             update_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query", !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
-            update_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words", !empty($_POST['split_compound_words']) && $_POST['split_compound_words']  === 'checked' ? 1 : 0);
+            update_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words", !empty($_POST['split_compound_words']) && $_POST['split_compound_words'] === 'checked' ? 1 : 0);
             update_option("{$this->plugin_slug}_finnish_base_forms_api_type", in_array($_POST['api_type'], ['binary', 'command_line', 'web_api']) ? $_POST['api_type'] : 'command_line');
             $updated = true;
         }
@@ -369,6 +380,10 @@ class FinnishBaseForms {
             $wordbases = $this->parse_wordbases($matches[1]);
         }
 
+        self::debug($words);
+        self::debug($baseforms);
+        self::debug($wordbases);
+
         return array_unique(array_merge($baseforms, $wordbases));
     }
 
@@ -413,18 +428,12 @@ class FinnishBaseForms {
      * Make sure binary is executable
      * @param string $path
      */
-    function ensure_permissions($path) {
+    function ensure_permissions($path)
+    {
         $permissions = substr(sprintf('%o', fileperms($path)), -4);
         if ($permissions !== '0755') {
             chmod($path, 0755);
         }
-    }
-
-    /**
-     * @param mixed $message
-     */
-    function debug($message) {
-        error_log(print_r($message, true));
     }
 
     /**
@@ -509,15 +518,15 @@ class FinnishBaseForms {
                 break;
             }
         }
-        return (string) Stringy\Stringy::create($options['fallback']($post))
+        return (string)Stringy\Stringy::create($options['fallback']($post))
             ->safeTruncate($options['length']);
     }
 
     /**
-     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param string $haystack
      * @param array $needles
      * @return string
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      */
     function find_spans($haystack, $needles)
     {
@@ -532,10 +541,10 @@ class FinnishBaseForms {
     }
 
     /**
-     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param string $spans
      * @param int $window_size
      * @return int
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      */
     function find_best_window($spans, $window_size)
     {
@@ -576,11 +585,11 @@ class FinnishBaseForms {
     }
 
     /**
-     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param string $text
      * @param array $terms
      * @param int $window_size
      * @return string
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      */
     function do_it($text, $terms, $window_size)
     {
@@ -599,10 +608,10 @@ class FinnishBaseForms {
     }
 
     /**
-     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      * @param $value
      * @param array $query
      * @return array
+     * @author Tuomas Siipola <siiptuo@kapsi.fi>
      */
     function get_matches($value, $query)
     {
@@ -671,6 +680,65 @@ class FinnishBaseForms {
 
     }
 
+    function lemmatize_replace($value)
+    {
+
+        $split_compound_words = get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words");
+
+        $tokenized = $this->tokenize(mb_strtolower($value));
+
+        $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'web_api';
+
+        if ($api_type === 'command_line' || $api_type === 'binary') {
+
+            $binary_path = null;
+            if ($api_type === 'binary') {
+                $path = plugin_dir_path(__FILE__);
+                $this->ensure_permissions("{$path}bin/voikkospell");
+                $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+            } else {
+                $binary_path = 'voikkospell';
+            }
+
+            $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
+            $process->run();
+            $locale = strtok($process->getOutput(), "\n");
+
+            $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
+                'LANG' => $locale,
+                'LC_ALL' => $locale,
+            ]);
+            $process->setInput(implode($tokenized, "\n"));
+            $process->run();
+
+            preg_match_all('/A\((.*)\).*BASEFORM=(.*)$/m', $process->getOutput(), $matches2);
+
+            $words = array_fill_keys($tokenized, []);
+
+            for ($i = 0; $i < count($matches2[0]); $i++) {
+                $words[$matches2[1][$i]][] = $matches2[2][$i];
+            }
+
+            /* Words looks now something like this:
+               {"ohjelmakartta":["ohjelmakarsi","ohjelmakartta"],"kerrostalo":["kerrostalo"],"qwerty":[]}
+            */
+
+            $return = '';
+
+            foreach ($words as $key => $value) {
+                if (empty($value)) {
+                    $return = $return . ' ' . $key;
+                } else {
+                    $return = $return . ' ' . $value[0];
+                }
+            }
+
+            // TODO: split compound words
+
+            return $return;
+        }
+        return $value;
+    }
 }
 
 $finnish_base_forms = new FinnishBaseForms();
