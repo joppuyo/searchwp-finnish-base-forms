@@ -140,10 +140,6 @@ class FinnishBaseForms
 
                     return $terms;
                 }, 10, 2);
-
-                // By default SearchWP will try AND logic first and after that OR logic if there are no results.
-                // Because we have the same search term multiple times, we want to always use OR logic
-                //add_filter('searchwp_and_logic', '__return_false');
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_search_filters', function ($parameters) {
 
