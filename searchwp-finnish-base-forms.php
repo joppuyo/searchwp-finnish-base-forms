@@ -738,7 +738,7 @@ class FinnishBaseForms
 
             // TODO: split compound words
 
-            return $return;
+            return trim($return);
         }
         return $value;
     }
