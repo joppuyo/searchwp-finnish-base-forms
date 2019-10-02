@@ -27,6 +27,8 @@ class FinnishBaseForms
     // This is used for option keys etc.
     private $plugin_slug = 'searchwp';
 
+    private $api_type;
+
     /**
      * @param mixed $message
      */
@@ -39,6 +41,8 @@ class FinnishBaseForms
 
     public function __construct()
     {
+        $this->api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'binary';
+
         $update_checker = Puc_v4_Factory::buildUpdateChecker(
             'https://github.com/joppuyo/searchwp-finnish-base-forms',
             __FILE__,
@@ -58,7 +62,7 @@ class FinnishBaseForms
         add_action("wp_ajax_{$this->plugin_slug}_finnish_base_forms_test", function () {
             $api_type = $_POST['api_type'];
             if ($api_type === 'binary' || $api_type === 'command_line') {
-                $baseforms = $this->voikkospell(['käden'], $api_type);
+                $baseforms = $this->voikkospell(['käden']);
             } else {
                 $baseforms = $this->web_api(['käden'], $_POST['api_root']);
             }
@@ -187,10 +191,8 @@ class FinnishBaseForms
     {
         $tokenized = $this->tokenize($content);
 
-        $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'binary';
-
-        if ($api_type === 'binary' || $api_type === 'command_line') {
-            $extra_words = $this->voikkospell($tokenized, $api_type);
+        if ($this->api_type === 'binary' || $$this->api_type === 'command_line') {
+            $extra_words = $this->voikkospell($tokenized);
         } else {
             $api_root = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
             $extra_words = $this->web_api($tokenized, $api_root);
@@ -252,7 +254,7 @@ class FinnishBaseForms
         }
 
         $api_url = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
-        $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'binary';
+        $api_type = $this->api_type;
 
         echo '<div class="wrap">';
         echo '    <h1>' . __("$this->plugin_name Finnish Base Forms", "{$this->plugin_slug}_finnish_base_forms") . '</h1>';
@@ -340,14 +342,13 @@ class FinnishBaseForms
 
     /**
      * @param $words
-     * @param $api_type 'binary' or 'command_line'
      * @return array
      * @throws Exception
      */
-    function voikkospell($words, $api_type)
+    function voikkospell($words)
     {
         $binary_path = null;
-        if ($api_type === 'binary') {
+        if ($this->api_type === 'binary') {
             $path = plugin_dir_path(__FILE__);
             $this->ensure_permissions("{$path}bin/voikkospell");
             $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
@@ -457,7 +458,7 @@ class FinnishBaseForms
         $options = array_merge($defaults, $options);
 
         $query = explode(' ', $this->lemmatize(mb_strtolower($options['query'])));
-        
+
         $query = array_values(array_filter($query, function ($word) {
             return mb_strlen($word) > 2;
         }));
@@ -626,9 +627,7 @@ class FinnishBaseForms
 
         $matches = [];
 
-        $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'web_api';
-
-        if ($api_type === 'command_line' || $api_type === 'binary') {
+        if ($this->api_type === 'command_line' || $this->api_type === 'binary') {
 
             foreach ($tokenized as $token) {
                 if (in_array(mb_strtolower($token), $query)) {
@@ -637,7 +636,7 @@ class FinnishBaseForms
             }
 
             $binary_path = null;
-            if ($api_type === 'binary') {
+            if ($this->api_type === 'binary') {
                 $path = plugin_dir_path(__FILE__);
                 $this->ensure_permissions("{$path}bin/voikkospell");
                 $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
