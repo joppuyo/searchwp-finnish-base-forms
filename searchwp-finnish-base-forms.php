@@ -292,7 +292,7 @@ class FinnishBaseForms
         echo '            </tr>';
         echo '            <tr>';
         echo '                <th scope="row">';
-        echo '                    <label>' . __('Add base forms to search query', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
+        echo '                    <label>' . __('Convert search query to base forms', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
         echo '                </th>';
         echo '                <td>';
         echo '                <input type="checkbox" name="lemmatize_search_query" id="lemmatize_search_query" value="checked" ' . checked(get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query"), '1', false) . ' />';
