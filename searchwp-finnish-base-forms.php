@@ -457,6 +457,10 @@ class FinnishBaseForms
         $options = array_merge($defaults, $options);
 
         $query = explode(' ', $this->lemmatize(mb_strtolower($options['query'])));
+        
+        $query = array_values(array_filter($query, function ($word) {
+            return mb_strlen($word) > 2;
+        }));
 
         global $searchwp;
 
