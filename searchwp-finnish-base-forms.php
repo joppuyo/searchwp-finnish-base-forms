@@ -713,6 +713,19 @@ class FinnishBaseForms
                {"ohjelmakartta":["ohjelmakarsi","ohjelmakartta"],"kerrostalo":["kerrostalo"],"qwerty":[]}
             */
 
+            self::debug($words);
+
+            foreach ($words as $key => $value) {
+                global $wpdb;
+                foreach ($value as $sub_item) {
+                    $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, base_form, split_compound_words) VALUES('$key', '$sub_item', '')");
+                    error_log("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, base_form, split_compound_words) VALUES('$key', '$sub_item', '')");
+                }
+                if(empty($value)) {
+                    $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, base_form, split_compound_words) VALUES('$key', '', '')");
+                }
+            }
+
             $return = '';
 
             foreach ($words as $key => $value) {
