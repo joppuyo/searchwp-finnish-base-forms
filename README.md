@@ -47,7 +47,7 @@ It's possible to generate Google-style search result excerpts where the keywords
 * SearchWP 2.5 or later
 * PHP 5.5.9
 * One of the following:
-  * A x64 Linux server 
+  * A x64 Linux or Mac server 
   * A server with voikkospell command line application installed
   * A server with  Node.js and about 1GB of spare RAM
 

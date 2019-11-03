@@ -18,6 +18,9 @@ SearchWP plugin to add Finnish base forms in search index. Requires SearchWP 2.5
 
 == Changelog ==
 
+= 3.2.0 =
+* Add pre-built voikkospell binary for Mac systems
+
 = 3.1.0 =
 * Feature: Make search behavior more accurate and consistent with SearchWP. Rather than always using AND logic, now OR logic is used first instead https://searchwp.com/docs/hooks/searchwp_and_logic/ . This means rather than appending lemmatized words - for example changing search query "koirien kouluttaminen" to "koirien kouluttaminen koira kouluttaa" it is changed to "koira kouluttaa". All base words are still indexed so for example for word "teet", both "tehdä" and "tee" are indexed so they are both found for relevant queries.
 * Fix: Fix error that could happen when generating excerpt with less than three character search queries
