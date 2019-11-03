@@ -337,8 +337,12 @@ class FinnishBaseForms
         $binary_path = null;
         if ($this->api_type === 'binary') {
             $path = plugin_dir_path(__FILE__);
-            $this->ensure_permissions("{$path}bin/voikkospell");
-            $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+            $binary = 'voikkospell';
+            if (stripos(PHP_OS, 'darwin') === 0) {
+                $binary = 'voikkospell-mac';
+            }
+            $this->ensure_permissions("{$path}bin/{$binary}");
+            $binary_path = "{$path}bin/{$binary} -p {$path}bin/dictionary";
         } else {
             $binary_path = 'voikkospell';
         }
@@ -625,8 +629,12 @@ class FinnishBaseForms
             $binary_path = null;
             if ($this->api_type === 'binary') {
                 $path = plugin_dir_path(__FILE__);
-                $this->ensure_permissions("{$path}bin/voikkospell");
-                $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+                $binary = 'voikkospell';
+                if (stripos(PHP_OS, 'darwin') === 0) {
+                    $binary = 'voikkospell-mac';
+                }
+                $this->ensure_permissions("{$path}bin/{$binary}");
+                $binary_path = "{$path}bin/{$binary} -p {$path}bin/dictionary";
             } else {
                 $binary_path = 'voikkospell';
             }
@@ -682,10 +690,14 @@ class FinnishBaseForms
         if ($api_type === 'command_line' || $api_type === 'binary') {
 
             $binary_path = null;
-            if ($api_type === 'binary') {
+            if ($this->api_type === 'binary') {
                 $path = plugin_dir_path(__FILE__);
-                $this->ensure_permissions("{$path}bin/voikkospell");
-                $binary_path = "{$path}bin/voikkospell -p {$path}bin/dictionary";
+                $binary = 'voikkospell';
+                if (stripos(PHP_OS, 'darwin') === 0) {
+                    $binary = 'voikkospell-mac';
+                }
+                $this->ensure_permissions("{$path}bin/{$binary}");
+                $binary_path = "{$path}bin/{$binary} -p {$path}bin/dictionary";
             } else {
                 $binary_path = 'voikkospell';
             }
