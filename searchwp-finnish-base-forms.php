@@ -178,7 +178,7 @@ class FinnishBaseForms
     {
         $tokenized = $this->tokenize($content);
 
-        if ($this->api_type === 'binary' || $$this->api_type === 'command_line') {
+        if ($this->api_type === 'binary' || $this->api_type === 'command_line') {
             $extra_words = $this->voikkospell($tokenized);
         } else {
             $api_root = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
