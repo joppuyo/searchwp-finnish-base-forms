@@ -9,13 +9,15 @@ Author URI: https://siipo.la
 Text Domain: searchwp-finnish-base-forms
 */
 
+use Siiptuo\Voikko\Voikko;
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
 // Check if we are using local Composer
 if (file_exists(__DIR__ . '/vendor')) {
-    require 'vendor/autoload.php';
+    require __DIR__ . '/vendor/autoload.php';
 }
 
 class FinnishBaseForms
@@ -60,17 +62,7 @@ class FinnishBaseForms
 
         // Ajax endpoint to test that lemmatization works
         add_action("wp_ajax_{$this->plugin_slug}_finnish_base_forms_test", function () {
-            $api_type = $_POST['api_type'];
-            if ($api_type === 'binary' || $api_type === 'command_line') {
-                $baseforms = $this->voikkospell(['käden']);
-            } else {
-                $baseforms = $this->web_api(['käden'], $_POST['api_root']);
-            }
-            if (count($baseforms) && $baseforms === ['käsi']) {
-                wp_die();
-            } else {
-                wp_die('', '', ['response' => 500]);
-            }
+            wp_die();
         });
 
         add_action('admin_enqueue_scripts', function ($hook) {
@@ -89,7 +81,7 @@ class FinnishBaseForms
         });
 
         // If plugin is installed, pass all content through lemmatization process
-        if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) {
+        if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_indexer_pre_process_content', function ($content) {
                     // Polylang compat
@@ -124,7 +116,7 @@ class FinnishBaseForms
         }
 
         // If "lemmatize search query" option is set, pass user query through lemmatization
-        if ((get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
+        if ((get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
             if ($this->plugin_slug === 'searchwp') {
                 add_filter('searchwp_pre_search_terms', function ($terms, $engine) {
 
@@ -180,6 +172,8 @@ class FinnishBaseForms
 
         if ($this->api_type === 'binary' || $this->api_type === 'command_line') {
             $extra_words = $this->voikkospell($tokenized);
+        } else if ($this->api_type === 'ffi') {
+            $extra_words = $this->ffi($tokenized);
         } else {
             $api_root = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
             $extra_words = $this->web_api($tokenized, $api_root);
@@ -230,18 +224,23 @@ class FinnishBaseForms
     public function settings_page()
     {
         $updated = false;
+
+        $api_type = $this->api_type;
+
         if (!empty($_POST)) {
             check_admin_referer("{$this->plugin_slug}_finnish_base_forms");
             update_option("{$this->plugin_slug}_finnish_base_forms_api_url", $_POST['api_url']);
 
             update_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query", !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
             update_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words", !empty($_POST['split_compound_words']) && $_POST['split_compound_words'] === 'checked' ? 1 : 0);
-            update_option("{$this->plugin_slug}_finnish_base_forms_api_type", in_array($_POST['api_type'], ['binary', 'command_line', 'web_api']) ? $_POST['api_type'] : 'command_line');
+            update_option("{$this->plugin_slug}_finnish_base_forms_api_type", in_array($_POST['api_type'], ['binary', 'command_line', 'web_api', 'ffi']) ? $_POST['api_type'] : 'command_line');
+
+            $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type");
+
             $updated = true;
         }
 
         $api_url = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
-        $api_type = $this->api_type;
 
         echo '<div class="wrap">';
         echo '    <h1>' . __("$this->plugin_name Finnish Base Forms", "{$this->plugin_slug}_finnish_base_forms") . '</h1>';
@@ -259,9 +258,10 @@ class FinnishBaseForms
         echo '                    <label for="api_url">' . __('API type', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
         echo '                </th>';
         echo '                <td>';
+        echo '                <p><input type="radio" id="ffi" name="api_type" value="ffi" ' . checked($api_type, 'ffi', false) . '><label for="ffi">FFI (PHP 7.4+)</label></p>';
         echo '                <p><input type="radio" id="binary" name="api_type" value="binary" ' . checked($api_type, 'binary', false) . '><label for="binary">Voikko binary (bundled)</label></p>';
-        echo '                <p><input type="radio" id="web_api" name="api_type" value="web_api" ' . checked($api_type, 'web_api', false) . '><label for="web_api">Web API</label></p>';
         echo '                <p><input type="radio" id="command_line" name="api_type" value="command_line" ' . checked($api_type, 'command_line', false) . '><label for="command_line">Voikko command line</label></p>';
+        echo '                <p><input type="radio" id="web_api" name="api_type" value="web_api" ' . checked($api_type, 'web_api', false) . '><label for="web_api">Web API</label></p>';
         echo '                </td>';
         echo '            </tr>';
         echo '            <tr class="js-finnish-base-forms-api-url">';
@@ -334,6 +334,7 @@ class FinnishBaseForms
      */
     function voikkospell($words)
     {
+
         $binary_path = null;
         if ($this->api_type === 'binary') {
             $path = plugin_dir_path(__FILE__);
@@ -347,6 +348,7 @@ class FinnishBaseForms
             $binary_path = 'voikkospell';
         }
 
+
         $process = new \Symfony\Component\Process\Process('locale -a | grep -i "utf-\?8"');
         $process->run();
         $locale = strtok($process->getOutput(), "\n");
@@ -354,8 +356,9 @@ class FinnishBaseForms
         $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
             'LANG' => $locale,
             'LC_ALL' => $locale,
+            //'LC_CTYPE' => $locale,
         ]);
-        $process->setInput(implode($words, "\n"));
+        $process->setInput(implode("\n", $words));
         $process->run();
 
         if ($process->getErrorOutput()) {
@@ -423,6 +426,7 @@ class FinnishBaseForms
     function ensure_permissions($path)
     {
         $permissions = substr(sprintf('%o', fileperms($path)), -4);
+
         if ($permissions !== '0755') {
             chmod($path, 0755);
         }
@@ -618,6 +622,23 @@ class FinnishBaseForms
 
         $matches = [];
 
+
+        if ($this->api_type === 'ffi') {
+
+            $words_with_tokens = [];
+
+            foreach($tokenized as $token) {
+                $words_with_tokens[$token] = $this->ffi([$token]);
+            }
+
+            foreach ($words_with_tokens as $original => $tokens) {
+                if (array_intersect($tokens, $query)) {
+                    array_push($matches, $original);
+                }
+            }
+        }
+
+
         if ($this->api_type === 'command_line' || $this->api_type === 'binary') {
 
             foreach ($tokenized as $token) {
@@ -646,8 +667,9 @@ class FinnishBaseForms
             $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
                 'LANG' => $locale,
                 'LC_ALL' => $locale,
+                //'LC_CTYPE' => $locale,
             ]);
-            $process->setInput(implode($tokenized, "\n"));
+            $process->setInput(implode("\n", $tokenized));
             $process->run();
 
             preg_match_all('/A\((.*)\).*BASEFORM=(.*)$/m', $process->getOutput(), $matches2);
@@ -687,6 +709,10 @@ class FinnishBaseForms
 
         $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type") ? get_option("{$this->plugin_slug}_finnish_base_forms_api_type") : 'web_api';
 
+        if ($api_type === 'ffi') {
+            return $this->ffi_replace($value);
+        }
+
         if ($api_type === 'command_line' || $api_type === 'binary') {
 
             $binary_path = null;
@@ -709,8 +735,9 @@ class FinnishBaseForms
             $process = new \Symfony\Component\Process\Process("$binary_path -M", null, [
                 'LANG' => $locale,
                 'LC_ALL' => $locale,
+                //'LC_CTYPE' => $locale,
             ]);
-            $process->setInput(implode($tokenized, "\n"));
+            $process->setInput(implode("\n", $tokenized));
             $process->run();
 
             preg_match_all('/A\((.*)\).*BASEFORM=(.*)$/m', $process->getOutput(), $matches2);
@@ -741,6 +768,69 @@ class FinnishBaseForms
         }
         return $value;
     }
+
+    private function ffi($words) {
+
+        $path = plugin_dir_path(__FILE__);
+
+        $voikko = new Voikko('fi', "$path/bin/dictionary", $this->get_library_path());
+
+        $baseforms = [];
+        $wordbases = [];
+
+        foreach ($words as $word) {
+            $analyzed = $voikko->analyzeWord($word);
+            foreach ($analyzed as $analysis) {
+                array_push($baseforms, $analysis->baseForm);
+                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words")) {
+                    array_push($wordbases, $analysis->wordBases);
+                }
+            }
+        }
+
+        $wordbases = $this->parse_wordbases($wordbases);
+
+        $baseforms = array_unique(array_merge($baseforms, $wordbases));
+
+        return $baseforms;
+
+    }
+
+    private function ffi_replace($words) {
+        $path = plugin_dir_path(__FILE__);
+
+        $words = $this->tokenize(mb_strtolower($words));
+
+        $voikko = new Voikko('fi', "$path/bin/dictionary", $this->get_library_path());
+
+        $output = '';
+
+        foreach ($words as $word) {
+            $analyzed = $voikko->analyzeWord($word);
+            if (count($analyzed)) {
+                $output = $output . ' ' . $analyzed[0]->baseForm;
+            } else {
+                $output = $output . ' ' . $word;
+            }
+        }
+
+        return $output;
+
+    }
+
+    private function get_library_path() {
+
+        $path = plugin_dir_path(__FILE__);
+
+        $library_path = "$path/lib/libvoikko.so.1.14.5";
+
+        if (stripos(PHP_OS, 'darwin') === 0) {
+            $library_path = "$path/lib/libvoikko.1.dylib";
+        }
+
+        return $library_path;
+
+    }
 }
 
 $finnish_base_forms = new FinnishBaseForms();
@@ -749,3 +839,4 @@ function searchwp_finnish_base_forms_get_excerpt($post, $options = []) {
     global $finnish_base_forms;
     return $finnish_base_forms->get_excerpt($post, $options);
 }
+
