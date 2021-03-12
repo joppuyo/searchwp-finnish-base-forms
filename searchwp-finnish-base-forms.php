@@ -782,7 +782,7 @@ class FinnishBaseForms
             $analyzed = $voikko->analyzeWord($word);
             foreach ($analyzed as $analysis) {
                 array_push($baseforms, $analysis->baseForm);
-                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words")) {
+                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words") && !empty($analysis->wordBases)) {
                     array_push($wordbases, $analysis->wordBases);
                 }
             }
