@@ -7,11 +7,18 @@
         "guzzlehttp/guzzle": "^6.3",
         "symfony/process": ">=3.3",
         "yahnis-elsts/plugin-update-checker": "^4.4",
-        "danielstjules/stringy": "^3.1"
+        "danielstjules/stringy": "^3.1",
+        "siiptuo/voikko": "dev-master"
     },
     "config": {
         "platform": {
             "php": "5.5.9"
         }
-    }
+    },
+    "repositories":[
+        {
+            "type": "vcs",
+            "url": "https://github.com/siiptuo/voikko-php"
+        }
+    ]
 }
