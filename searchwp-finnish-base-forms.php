@@ -242,6 +242,10 @@ class FinnishBaseForms
 
         $api_url = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
 
+        $ffi_available = extension_loaded('ffi');
+
+        $disabled = $ffi_available ? '' : 'disabled';
+
         echo '<div class="wrap">';
         echo '    <h1>' . __("$this->plugin_name Finnish Base Forms", "{$this->plugin_slug}_finnish_base_forms") . '</h1>';
         echo '    <div class="js-finnish-base-forms-admin-notices"></div>';
@@ -258,7 +262,7 @@ class FinnishBaseForms
         echo '                    <label for="api_url">' . __('API type', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
         echo '                </th>';
         echo '                <td>';
-        echo '                <p><input type="radio" id="ffi" name="api_type" value="ffi" ' . checked($api_type, 'ffi', false) . '><label for="ffi">FFI (PHP 7.4+)</label></p>';
+        echo '                <p><input type="radio" id="ffi" name="api_type" value="ffi" ' . checked($api_type, 'ffi', false) . $disabled . '><label for="ffi">FFI (requires FFI extension, PHP 7.4+)</label></p>';
         echo '                <p><input type="radio" id="binary" name="api_type" value="binary" ' . checked($api_type, 'binary', false) . '><label for="binary">Voikko binary (bundled)</label></p>';
         echo '                <p><input type="radio" id="command_line" name="api_type" value="command_line" ' . checked($api_type, 'command_line', false) . '><label for="command_line">Voikko command line</label></p>';
         echo '                <p><input type="radio" id="web_api" name="api_type" value="web_api" ' . checked($api_type, 'web_api', false) . '><label for="web_api">Web API</label></p>';
