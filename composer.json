@@ -15,6 +15,11 @@
             "php": "5.5.9"
         }
     },
+    "autoload": {
+        "psr-4": {
+            "NPX\\FinnishBaseForms\\": "src/"
+        }
+    },
     "repositories":[
         {
             "type": "vcs",
