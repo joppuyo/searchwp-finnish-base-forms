@@ -68,7 +68,16 @@ class Plugin
         // If plugin is installed, pass all content through lemmatization process
         if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) {
             if ($this->plugin_slug === 'searchwp') {
+
+                //SearchWP 3
                 add_filter('searchwp_indexer_pre_process_content', [$this, 'indexer_pre_process_content']);
+
+                // SearchWP 4
+                add_filter('searchwp\source\post\attributes\content', [$this, 'indexer_pre_process_content']);
+                add_filter('searchwp\source\post\attributes\meta', [$this, 'indexer_pre_process_content']);
+                // Special case for title
+                add_filter( 'searchwp\entry\data', [$this, 'entry_data'], 20, 2 );
+
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_post_content_before_tokenize', function ($content, $post) {
                     // Polylang compat
@@ -97,7 +106,13 @@ class Plugin
         // If "lemmatize search query" option is set, pass user query through lemmatization
         if ((get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
             if ($this->plugin_slug === 'searchwp') {
+
+                // SearchWP 3
                 add_filter('searchwp_pre_search_terms', [$this, 'searchwp_lemmatize_search_query'], 10, 2);
+
+                // SearchWP 4
+                add_filter('searchwp\query\tokens', [$this, 'searchwp_lemmatize_search_query'], 10, 2);
+
             } else if ($this->plugin_slug === 'relevanssi') {
                 add_filter('relevanssi_search_filters', function ($parameters) {
 
@@ -247,11 +262,23 @@ class Plugin
         }
 
         if ($has_multiple_meanings) {
+
+            // SearchWP 3
             add_filter('searchwp_and_logic', '__return_false');
+
+            // SearchWP 4
+            add_filter('searchwp\query\logic\and', '__return_false');
         }
 
         $output_terms = array_unique($output_terms);
 
         return $output_terms;
+    }
+
+    function entry_data( $data, $entry )
+    {
+        $lemmatized = $this->lemmatize($data['title']->raw);
+        $data['title'] = new \SearchWP\Tokens($lemmatized);
+        return $data;
     }
 }
