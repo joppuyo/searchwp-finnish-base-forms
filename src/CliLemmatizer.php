@@ -66,7 +66,7 @@ class CliLemmatizer extends Lemmatizer {
 
             $output_item['baseform'] = $baseform_matches[2][0];
 
-            if (!empty($wordbases_matches)) {
+            if (!empty($wordbases_matches) && !empty($wordbases_matches[2]) && !empty($wordbases_matches[2][0])) {
                 $output_item['wordbases'] = $this->parse_wordbases([$wordbases_matches[2][0]]);
             }
 
