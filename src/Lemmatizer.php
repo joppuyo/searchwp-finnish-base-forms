@@ -25,15 +25,14 @@ abstract class Lemmatizer {
         foreach ($results as $result) {
 
             $new = [
-                'baseform' => $result['base_form'],
-                'wordbases' => explode(' ',$result['split_compound_words']),
+                'baseform' => $result['baseform'],
+                'wordbases' => explode(' ',$result['wordbases']),
             ];
 
             if (isset($cache_array[$result['term']]) || array_key_exists($result['term'], $cache_array)) {
                 array_push($cache_array[$result['term']], $new);
             } else {
                 $cache_array[$result['term']] = [$new];
-
             }
         }
 
@@ -70,11 +69,11 @@ abstract class Lemmatizer {
                 if (!empty($sub_item['wordbases'])) {
                     $wordbases = implode(' ', $sub_item['wordbases']);
                 }
-                $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, base_form, split_compound_words) VALUES('$word', '$baseform', '$wordbases')");
+                $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, baseform, wordbases) VALUES('$word', '$baseform', '$wordbases')");
             }
 
         } else {
-            $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, base_form, split_compound_words) VALUES('$word', '', '')");
+            $wpdb->query("REPLACE INTO {$wpdb->prefix}swpfbf_cache (term, baseform, wordbases) VALUES('$word', '', '')");
         }
 
         $this->cache_array[$word] = $lemmatized_data;
@@ -93,10 +92,10 @@ abstract class Lemmatizer {
         $sql =
             "CREATE TABLE {$table_name} (
   `term` varchar(255) NOT NULL DEFAULT '',
-  `base_form` varchar(255) NOT NULL DEFAULT '',
-  `split_compound_words` varchar(255) DEFAULT NULL,
-  PRIMARY KEY  (`term`,`base_form`),
-  UNIQUE KEY `term` (`term`,`base_form`)
+  `baseform` varchar(255) NOT NULL DEFAULT '',
+  `wordbases` varchar(255) DEFAULT NULL,
+  PRIMARY KEY  (`term`,`baseform`),
+  UNIQUE KEY `term` (`term`,`baseform`)
   ) COLLATE {$wpdb_collate}";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
