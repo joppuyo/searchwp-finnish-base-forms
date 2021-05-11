@@ -54,7 +54,11 @@ abstract class Lemmatizer {
     function lemmatize_cached(string $word) {
 
         if (isset($this->cache_array[$word]) || array_key_exists($word, $this->cache_array)) {
-            //dump('cache hit');
+
+            if (empty($this->cache_array[$word][0]['baseform'])) {
+                return [];
+            }
+
             return $this->cache_array[$word];
         }
 
