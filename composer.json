@@ -3,6 +3,7 @@
     "type": "wordpress-plugin",
     "description": "SearchWP plugin to add Finnish base forms in search index",
     "license": "GPL-3.0-or-later",
+    "minimum-stability": "dev",
     "require": {
         "guzzlehttp/guzzle": "^6.3",
         "symfony/process": ">=3.3",
@@ -12,7 +13,7 @@
     },
     "config": {
         "platform": {
-            "php": "5.5.9"
+            "php": "7.0.33"
         }
     },
     "autoload": {

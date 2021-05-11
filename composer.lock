@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab14aab1e26af6731f66780d4bd091d0",
+    "content-hash": "493c1c4ecf684ad3dd70c44b596442c7",
     "packages": [
         {
             "name": "danielstjules/stringy",
@@ -182,16 +182,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.7.0",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3"
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/53330f47520498c0ae1f61f7e2c90f55690c06a3",
-                "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/dc960a912984efb74d0a90222870c72c87f10c91",
+                "reference": "dc960a912984efb74d0a90222870c72c87f10c91",
                 "shasum": ""
             },
             "require": {
@@ -249,37 +249,33 @@
                 "uri",
                 "url"
             ],
-            "time": "2020-09-30T07:37:11+00:00"
+            "time": "2021-04-26T09:17:50+00:00"
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v2.0.19",
+            "version": "v9.99.100",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "446fc9faa5c2a9ddf65eb7121c0af7e857295241"
+                "reference": "996434e5492cb4c3edcb9168db6fbb1359ef965a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/446fc9faa5c2a9ddf65eb7121c0af7e857295241",
-                "reference": "446fc9faa5c2a9ddf65eb7121c0af7e857295241",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/996434e5492cb4c3edcb9168db6fbb1359ef965a",
+                "reference": "996434e5492cb4c3edcb9168db6fbb1359ef965a",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.2.0"
+                "php": ">= 7"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.*|5.*"
+                "phpunit/phpunit": "4.*|5.*",
+                "vimeo/psalm": "^1"
             },
             "suggest": {
                 "ext-libsodium": "Provides a modern crypto API that can be used to generate random bytes."
             },
             "type": "library",
-            "autoload": {
-                "files": [
-                    "lib/random.php"
-                ]
-            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -298,7 +294,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2020-10-15T10:06:57+00:00"
+            "time": "2020-10-15T08:29:30+00:00"
         },
         {
             "name": "psr/http-message",
@@ -352,24 +348,24 @@
         },
         {
             "name": "ralouphie/getallheaders",
-            "version": "2.0.5",
+            "version": "3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ralouphie/getallheaders.git",
-                "reference": "5601c8a83fbba7ef674a7369456d12f1e0d0eafa"
+                "reference": "120b605dfeb996808c31b6477290a714d356e822"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ralouphie/getallheaders/zipball/5601c8a83fbba7ef674a7369456d12f1e0d0eafa",
-                "reference": "5601c8a83fbba7ef674a7369456d12f1e0d0eafa",
+                "url": "https://api.github.com/repos/ralouphie/getallheaders/zipball/120b605dfeb996808c31b6477290a714d356e822",
+                "reference": "120b605dfeb996808c31b6477290a714d356e822",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3"
+                "php": ">=5.6"
             },
             "require-dev": {
-                "phpunit/phpunit": "~3.7.0",
-                "satooshi/php-coveralls": ">=1.0"
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": "^5 || ^6.5"
             },
             "type": "library",
             "autoload": {
@@ -388,7 +384,7 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
-            "time": "2016-02-11T07:05:27+00:00"
+            "time": "2019-03-08T08:55:37+00:00"
         },
         {
             "name": "siiptuo/voikko",
@@ -396,12 +392,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/siiptuo/voikko-php.git",
-                "reference": "c61a8010e0f98fc242f24aa8e36bda4172d94607"
+                "reference": "5857ca9c6664ec5da278ff47af98753ffe252bfe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/siiptuo/voikko-php/zipball/c61a8010e0f98fc242f24aa8e36bda4172d94607",
-                "reference": "c61a8010e0f98fc242f24aa8e36bda4172d94607",
+                "url": "https://api.github.com/repos/siiptuo/voikko-php/zipball/5857ca9c6664ec5da278ff47af98753ffe252bfe",
+                "reference": "5857ca9c6664ec5da278ff47af98753ffe252bfe",
                 "shasum": ""
             },
             "require": {
@@ -439,7 +435,7 @@
                 "source": "https://github.com/siiptuo/voikko-php/tree/master",
                 "issues": "https://github.com/siiptuo/voikko-php/issues"
             },
-            "time": "2021-03-10T09:53:19+00:00"
+            "time": "2021-05-04T19:37:10+00:00"
         },
         {
             "name": "symfony/polyfill-intl-idn",
@@ -894,16 +890,16 @@
         },
         {
             "name": "yahnis-elsts/plugin-update-checker",
-            "version": "v4.10",
+            "version": "v4.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/YahnisElsts/plugin-update-checker.git",
-                "reference": "0edd15f67822464af8a23285ce367b30d515a855"
+                "reference": "3155f2d3f1ca5e7ed3f25b256f020e370515af43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/0edd15f67822464af8a23285ce367b30d515a855",
-                "reference": "0edd15f67822464af8a23285ce367b30d515a855",
+                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/3155f2d3f1ca5e7ed3f25b256f020e370515af43",
+                "reference": "3155f2d3f1ca5e7ed3f25b256f020e370515af43",
                 "shasum": ""
             },
             "require": {
@@ -913,7 +909,7 @@
             "type": "library",
             "autoload": {
                 "files": [
-                    "load-v4p10.php"
+                    "load-v4p11.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -936,12 +932,12 @@
                 "theme updates",
                 "wordpress"
             ],
-            "time": "2020-08-21T11:36:45+00:00"
+            "time": "2021-03-15T16:07:52+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
         "siiptuo/voikko": 20
     },
@@ -950,7 +946,7 @@
     "platform": [],
     "platform-dev": [],
     "platform-overrides": {
-        "php": "5.5.9"
+        "php": "7.0.33"
     },
     "plugin-api-version": "1.1.0"
 }

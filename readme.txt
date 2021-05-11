@@ -3,7 +3,7 @@ Contributors: joppuyo
 Tags: searchwp, finnish, stem, stemming, lemmatization, lemmatisation
 Requires at least: 4.9.4
 Tested up to: 4.9.4
-Requires PHP: 5.5.9 or greater
+Requires PHP: 7.0.8 or greater
 License: License: GPLv3 or later
 
 SearchWP plugin to add Finnish base forms in search index
