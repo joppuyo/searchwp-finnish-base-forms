@@ -2,6 +2,9 @@
 
 namespace NPX\FinnishBaseForms;
 
+use SearchWP\Engine;
+use SearchWP\Settings;
+
 class Excerpt
 {
 
@@ -29,7 +32,6 @@ class Excerpt
      */
     function get_excerpt($post, $options)
     {
-
         $defaults = [
             'length' => 300,
             'fallback' => function ($post) {
@@ -61,46 +63,95 @@ class Excerpt
             }
         }
 
-        $query = array_values(array_filter($query, function ($word) {
-            return mb_strlen($word) > 2;
-        }));
+        $query = array_values(
+            array_filter(
+                $query,
+                function ($word) {
+                    return mb_strlen($word) > 2;
+                }
+            )
+        );
 
         global $searchwp;
 
-        // TODO: maybe find a better way to get this?
-        $searchwp_engine = $searchwp->diagnostics[0]['engine'];
-
-        $searchwp_settings = $searchwp->settings;
-        $post_type = $post->post_type;
-
-        $post_type_settings = $searchwp_settings['engines'][$searchwp_engine][$post_type];
-
-        $fields = get_post_meta($post->ID);
-
-        if (!empty($post_type_settings['weights']['content'])) {
-            $fields['wp_content'][0] = $post->post_content;
-        }
-
-        if (!empty($post_type_settings['weights']['excerpt'])) {
-            $fields['wp_excerpt'][0] = $post->post_excerpt;
-        }
+        Plugin::debug('$searchwp');
+        Plugin::debug($searchwp);
 
         $keys = ['wp_excerpt', 'wp_content'];
 
-        // TODO: maybe take weight into account?
-        if (!empty($post_type_settings['weights']['cf'])) {
-            foreach ($post_type_settings['weights']['cf'] as $meta_key) {
-                array_push($keys, str_replace('%', '*', $meta_key['metakey']));
+        // SearchWP 4
+        if (empty($searchwp->diagnostics)) {
+
+            if (empty($searchwp)) {
+                return '';
+            }
+
+            $settings = Settings::get_engine_settings($searchwp);
+
+            Plugin::debug($settings);
+
+            $post_type = $post->post_type;
+
+            if (empty($settings['sources']["post.$post_type"])) {
+                return '';
+            }
+
+            $post_type_settings = $settings['sources']["post.$post_type"]['attributes'];
+
+            $fields = get_post_meta($post->ID);
+
+            if (!empty($post_type_settings['content'])) {
+                $fields['wp_content'][0] = $post->post_content;
+            }
+
+            if (!empty($post_type_settings['excerpt'])) {
+                $fields['wp_excerpt'][0] = $post->post_excerpt;
+            }
+
+            // TODO: maybe take weight into account?
+            if (!empty($post_type_settings['meta'])) {
+                foreach ($post_type_settings['meta'] as $key => $meta) {
+                    array_push($keys, str_replace('%', '*', $key));
+                }
+            }
+
+        }
+
+        // SearchWP 3
+        if (!empty($searchwp->diagnostics)) {
+            // TODO: maybe find a better way to get this?
+            $searchwp_engine = $searchwp->diagnostics[0]['engine'];
+
+            $searchwp_settings = $searchwp->settings;
+            $post_type = $post->post_type;
+
+            $post_type_settings = $searchwp_settings['engines'][$searchwp_engine][$post_type];
+
+            $fields = get_post_meta($post->ID);
+
+            if (!empty($post_type_settings['weights']['content'])) {
+                $fields['wp_content'][0] = $post->post_content;
+            }
+
+            if (!empty($post_type_settings['weights']['excerpt'])) {
+                $fields['wp_excerpt'][0] = $post->post_excerpt;
+            }
+
+            // TODO: maybe take weight into account?
+            if (!empty($post_type_settings['weights']['cf'])) {
+                foreach ($post_type_settings['weights']['cf'] as $meta_key) {
+                    array_push($keys, str_replace('%', '*', $meta_key['metakey']));
+                }
             }
         }
 
         foreach ($fields as $name => $field) {
-
             // TODO: make this more functional
             $match = false;
             foreach ($keys as $key) {
-                // searchwpcfdefault is special case for "any custom field"
-                if ($key === $name || fnmatch($key, $name) || $key === 'searchwpcfdefault') {
+                // searchwpcfdefault is special case for "any custom field" (SearchWP 3)
+                // * is special case for "any custom field" (SearchWP 4)
+                if ($key === $name || fnmatch($key, $name) || $key === 'searchwpcfdefault' || $key === '*') {
                     $match = true;
                 }
             }
@@ -115,18 +166,26 @@ class Excerpt
 
             if (count($matches)) {
                 // Sort matches by length, so that longest match is highlighted.
-                usort($matches, function ($a, $b) {
-                    return strlen($b) - strlen($a);
-                });
+                usort(
+                    $matches,
+                    function ($a, $b) {
+                        return strlen($b) - strlen($a);
+                    }
+                );
 
                 $result = $this->do_it($matched_field, $matches, $options['length']);
-                $result = preg_replace("/" . implode('|', array_map('preg_quote', $matches)) . "/i", '<strong>$0</strong>', $result);
+                $result = preg_replace(
+                    "/" . implode('|', array_map('preg_quote', $matches)) . "/i",
+                    '<strong>$0</strong>',
+                    $result
+                );
                 return $result;
                 break;
             }
         }
         return (string)\Stringy\Stringy::create($options['fallback']($post))
             ->safeTruncate($options['length']);
+
     }
 
     /**
