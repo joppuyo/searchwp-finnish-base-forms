@@ -1,6 +1,6 @@
 # SearchWP Finnish Base Forms
 
-[![Latest Stable Version](https://poser.pugx.org/joppuyo/searchwp-finnish-base-forms/v/stable)](https://packagist.org/packages/joppuyo/searchwp-finnish-base-forms) [![Build Status](https://travis-ci.org/joppuyo/searchwp-finnish-base-forms.svg?branch=master)](https://travis-ci.org/joppuyo/searchwp-finnish-base-forms)
+[![Build](https://github.com/joppuyo/searchwp-finnish-base-forms/actions/workflows/build.yml/badge.svg)](https://github.com/joppuyo/searchwp-finnish-base-forms/actions/workflows/build.yml)
 
 SearchWP plugin to add Finnish base forms into search index using [Voikko](https://voikko.puimula.org/).
 
