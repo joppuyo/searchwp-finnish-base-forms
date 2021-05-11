@@ -130,6 +130,9 @@ class Plugin
 
         // Add plugin to WordPress admin menu
         add_action('admin_menu', [$this, 'admin_menu']);
+
+        // SearchWP 4: We need to have accented characters or Voikko won't otherwise work properly
+        add_filter('searchwp\tokens\strict', '__return_true');
     }
 
     public function init()
