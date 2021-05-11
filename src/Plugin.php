@@ -167,6 +167,13 @@ class Plugin
         if (function_exists('pll_get_post_language')) {
             return get_option("{$this->plugin_slug}_finnish_base_forms_indexed_post_is_finnish") ? $this->lemmatize($content) : $content;
         }
+        if (is_array($content)) {
+            $output = [];
+            foreach ($content as $item) {
+                array_push($output, $this->lemmatize($item));
+            }
+            return $output;
+        }
         return $this->lemmatize($content);
     }
 
