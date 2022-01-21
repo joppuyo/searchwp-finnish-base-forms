@@ -1,6 +1,7 @@
 # SearchWP Finnish Base Forms
 
 [![Build](https://github.com/joppuyo/searchwp-finnish-base-forms/actions/workflows/build.yml/badge.svg)](https://github.com/joppuyo/searchwp-finnish-base-forms/actions/workflows/build.yml)
+[![Inactively Maintained](https://img.shields.io/badge/Maintenance%20Level-Inactively%20Maintained-yellowgreen.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 
 SearchWP plugin to add Finnish base forms into search index using [Voikko](https://voikko.puimula.org/).
 
