@@ -36,9 +36,9 @@ class Excerpt
             'length' => 300,
             'fallback' => function ($post) {
                 if (strlen($post->post_excerpt)) {
-                    return $post->post_excerpt;
+                    return strip_tags(html_entity_decode($post->post_excerpt));
                 }
-                return $post->post_content;
+                return strip_tags(html_entity_decode($post->post_content));
             },
             'query' => get_search_query(),
         ];
