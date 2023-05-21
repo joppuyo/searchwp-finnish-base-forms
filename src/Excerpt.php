@@ -184,7 +184,7 @@ class Excerpt
             }
         }
         return (string)\Stringy\Stringy::create($options['fallback']($post))
-            ->safeTruncate($options['length']);
+            ->safeTruncate($options['length'], '...');
 
     }
 
