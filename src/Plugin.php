@@ -196,7 +196,7 @@ class Plugin
 
             foreach ($output as $output_item) {
                 array_push($out_array, $output_item['baseform']);
-                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words") && count($output_item['wordbases'])) {
+                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words") && !empty($output_item['wordbases']) && count($output_item['wordbases'])) {
                     $out_array = array_merge($out_array, $output_item['wordbases']);
                 }
             }
