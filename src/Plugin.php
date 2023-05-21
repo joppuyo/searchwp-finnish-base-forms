@@ -260,6 +260,12 @@ class Plugin
 
             foreach ($lemmatized_data as $lemma) {
                 array_push($output_terms, $lemma['baseform']);
+
+                if (get_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words") && !empty($lemma['wordbases']) && count($lemma['wordbases'])) {
+                    $wordbases = $lemma['wordbases'];
+                    $output_terms = array_merge($output_terms, $wordbases);
+                    $has_multiple_meanings = true;
+                }
             }
 
             if (!count($lemmatized_data)) {
