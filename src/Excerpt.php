@@ -162,7 +162,7 @@ class Excerpt
 
             $matched_field = strip_tags(html_entity_decode($field[0]));
 
-            $matches = $this->get_matches($matched_field, $query);
+            $matches = $this->get_matches($matched_field, $query, $options['length']);
 
             if (count($matches)) {
                 // Sort matches by length, so that longest match is highlighted.
@@ -279,7 +279,7 @@ class Excerpt
      * @return array
      * @author Tuomas Siipola <siiptuo@kapsi.fi>
      */
-    function get_matches($value, $query)
+    function get_matches($value, $query, $length)
     {
 
         $plugin = Plugin::get_instance();
@@ -289,6 +289,9 @@ class Excerpt
         $plugin = Plugin::get_instance();
 
         $tokenized = $plugin->tokenize(mb_strtolower($value));
+
+        $characters_processed = 0;
+        $desired_length = $length * 2;
 
         $matches = [];
 
@@ -302,12 +305,25 @@ class Excerpt
             $words_with_tokens = [];
 
             foreach($tokenized as $token) {
+
+
+                if ($characters_processed > $desired_length) {
+                    break;
+                }
+
                 $result = $lemmatizer->lemmatize($token);
                 $words_with_tokens[$token] = [];
+
                 foreach ($result as $item) {
                     array_push($words_with_tokens[$token], $item['baseform']);
                     if (!empty($item['wordbases'])) {
                         $words_with_tokens[$token] = array_merge($words_with_tokens[$token], $item['wordbases']);
+                    }
+                }
+
+                foreach ($words_with_tokens as $original => $tokens) {
+                    if (array_intersect($tokens, $query)) {
+                        $characters_processed = $characters_processed + mb_strlen($token);
                     }
                 }
             }
