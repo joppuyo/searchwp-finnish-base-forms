@@ -43,6 +43,9 @@ class Excerpt
             'query' => get_search_query(),
         ];
 
+        $plugin = Plugin::get_instance();
+        $split_compound_words = get_option("{$plugin->plugin_slug}_finnish_base_forms_split_compound_words");
+
         $options = array_merge($defaults, $options);
 
         $lemmatizer = LemmatizerHelper::get_instance();
@@ -57,6 +60,10 @@ class Excerpt
             if (count($lemmatized)) {
                 foreach ($lemmatized as $lemma) {
                     array_push($query, $lemma['baseform']);
+                    if ($split_compound_words && !empty($lemma['wordbases']) && count($lemma['wordbases'])) {
+                        $wordbases = $lemma['wordbases'];
+                        $query = array_merge($query, $wordbases);
+                    }
                 }
             } else {
                 array_push($query, $part);
