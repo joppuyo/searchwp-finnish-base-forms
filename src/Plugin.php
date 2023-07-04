@@ -153,7 +153,7 @@ class Plugin
     public function admin_menu()
     {
         add_submenu_page(
-            null,
+            'options-general.php',
             __("$this->plugin_name Finnish Base Forms", "{$this->plugin_slug}_finnish_base_forms"),
             __("$this->plugin_name Finnish Base Forms", "{$this->plugin_slug}_finnish_base_forms"),
             'manage_options',
