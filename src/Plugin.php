@@ -3,6 +3,7 @@
 namespace NPX\FinnishBaseForms;
 
 use Puc_v4_Factory;
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 class Plugin
 {
@@ -137,8 +138,7 @@ class Plugin
 
     public function init()
     {
-
-        $update_checker = Puc_v4_Factory::buildUpdateChecker(
+        $update_checker = PucFactory::buildUpdateChecker(
             'https://github.com/joppuyo/searchwp-finnish-base-forms',
             $this->__FILE__,
             "{$this->plugin_slug}-finnish-base-forms"
