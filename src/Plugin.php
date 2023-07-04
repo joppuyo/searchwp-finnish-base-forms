@@ -220,8 +220,7 @@ class Plugin
      */
     function tokenize($str)
     {
-        $str = html_entity_decode($str);
-        $str = strip_tags($str);
+        $str = Plugin::strip_html($str);
         $arr = [];
         // for the character classes
         // see http://php.net/manual/en/regexp.reference.unicode.php
@@ -288,6 +287,10 @@ class Plugin
 
         $output_terms = array_unique($output_terms);
 
+        foreach ($output_terms as &$output_term) {
+            $output_term = mb_strtolower($output_term);
+        }
+
         return $output_terms;
     }
 
@@ -296,5 +299,42 @@ class Plugin
         $lemmatized = $this->lemmatize($data['title']->raw);
         $data['title'] = new \SearchWP\Tokens($lemmatized);
         return $data;
+    }
+
+    public static function strip_html($value) {
+
+        // Force spaces between tags to prevent words running into each other
+        $value = str_replace('<', ' <', $value);
+
+        // Replace HTML entities with real characters
+        $value = html_entity_decode($value, ENT_HTML5, 'UTF-8');
+
+        // Delete all HTML tags
+        $value = strip_tags($value);
+
+        // Trim extra whitespace at the start and the end
+        $value = trim($value);
+
+        // Trim extra whitespace inside text. Note: u flag kills nbsp
+        // https://stackoverflow.com/questions/6275380/does-html-entity-decode-replaces-nbsp-also-if-not-how-to-replace-it
+        $value = preg_replace('/\s+/u', ' ', $value);
+
+        return $value;
+    }
+
+    public function clear_cache() {
+        global $wpdb;
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+                $wpdb->esc_like( '_transient_swpfbf_' ) . '%' // _transient_swpfbf_5140dd09d8748bd9a826780f4b76a6b6
+            )
+        );
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM $wpdb->options WHERE option_name LIKE %s",
+                $wpdb->esc_like( '_transient_timeout_swpfbf_' ) . '%' // _transient_timeout_swpfbf_5140dd09d8748bd9a826780f4b76a6b6
+            )
+        );
     }
 }
