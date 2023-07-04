@@ -4,7 +4,7 @@ namespace NPX\FinnishBaseForms;
 
 abstract class Lemmatizer {
 
-    private $cache_array;
+    private $memo = [];
     public $__FILE__;
 
     abstract protected function lemmatize(string $word);
@@ -26,8 +26,7 @@ abstract class Lemmatizer {
         return $baseforms;
     }
 
-    function lemmatize_cached(string $word) {
-
+    public function sanitize(string $word) {
         // Replace quotes
 
         // U+2019 kaareva heittomerkki (suomalaisen typografisen perinteen mukainen) &rsquo; &#8217; &#x2019;
@@ -73,16 +72,33 @@ abstract class Lemmatizer {
 
         $word = preg_replace('/[^a-zA-Z0-9ŠšŽžÅåÄäÖö\-\']/u', ' ', $word);
         $word = trim($word);
-        
-        $key = 'swpfbf_' . md5($word);
+        return $word;
+    }
 
-        $lemmatized_data = get_transient($key);
+    function lemmatize_cached(string $word) {
 
-        if ($lemmatized_data === false) {
-            $lemmatized_data = $this->lemmatize($word);
-            set_transient($key, $lemmatized_data, YEAR_IN_SECONDS);
+        $hash = md5($word);
+
+        if (array_key_exists($hash, $this->memo)) {
+            return $this->memo[$hash];
         }
-        
+
+        $plugin = Plugin::get_instance();
+        $enable_cache = get_option("{$plugin->plugin_slug}_finnish_base_forms_enable_cache") ? get_option("{$plugin->plugin_slug}_finnish_base_forms_enable_cache") : false;
+
+        if ($enable_cache) {
+            $key = 'swpfbf_' . $hash;
+            $lemmatized_data = get_transient($key);
+            if ($lemmatized_data === false) {
+                $lemmatized_data = $this->lemmatize($word);
+                set_transient($key, $lemmatized_data, YEAR_IN_SECONDS);
+            }
+        } else {
+            $lemmatized_data = $this->lemmatize($word);
+        }
+
+        $this->memo[$hash] = $lemmatized_data;
+
         return $lemmatized_data;
     }
 }

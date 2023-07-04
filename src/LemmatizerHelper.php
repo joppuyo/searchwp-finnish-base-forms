@@ -2,8 +2,6 @@
 
 namespace NPX\FinnishBaseForms;
 
-use NPX\FinnishBaseForm\FfiLemmatizer;
-
 class LemmatizerHelper
 {
     private static $instance;
@@ -51,7 +49,7 @@ class LemmatizerHelper
         }
 
         if ($plugin->api_type === 'ffi') {
-            $this->lemmatizer = new FfiLemmatizer();
+            $this->lemmatizer = new \NPX\FinnishBaseForms\FfiLemmatizer();
         }
 
 

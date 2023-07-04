@@ -44,23 +44,33 @@ class Admin
     {
 
         $updated = false;
+        $cache_cleared = false;
 
         $api_type = $this->api_type;
 
-        if (!empty($_POST)) {
+        if (!empty($_POST) && isset($_POST['clear_cache']) && $_POST['clear_cache'] === '0') {
             check_admin_referer("{$this->plugin_slug}_finnish_base_forms");
             //update_option("{$this->plugin_slug}_finnish_base_forms_api_url", $_POST['api_url']);
 
             update_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query", !empty($_POST['lemmatize_search_query']) && $_POST['lemmatize_search_query'] === 'checked' ? 1 : 0);
             update_option("{$this->plugin_slug}_finnish_base_forms_split_compound_words", !empty($_POST['split_compound_words']) && $_POST['split_compound_words'] === 'checked' ? 1 : 0);
             update_option("{$this->plugin_slug}_finnish_base_forms_api_type", in_array($_POST['api_type'], ['binary', 'command_line', 'web_api', 'ffi']) ? $_POST['api_type'] : 'command_line');
+            update_option("{$this->plugin_slug}_finnish_base_forms_enable_cache", !empty($_POST['enable_cache']) && $_POST['enable_cache'] === 'checked' ? 1 : 0);
 
             $api_type = get_option("{$this->plugin_slug}_finnish_base_forms_api_type");
 
             $updated = true;
         }
 
-        $api_url = get_option("{$this->plugin_slug}_finnish_base_forms_api_url");
+        if (!empty($_POST) && isset($_POST['clear_cache']) && $_POST['clear_cache'] === '1') {
+            check_admin_referer("{$this->plugin_slug}_finnish_base_forms");
+            //update_option("{$this->plugin_slug}_finnish_base_forms_api_url", $_POST['api_url']);
+
+            $plugin = Plugin::get_instance();
+            $plugin->clear_cache();
+
+            $cache_cleared = true;
+        }
 
         $ffi_available = extension_loaded('ffi');
 
@@ -74,12 +84,17 @@ class Admin
             echo '        <p>' . __('Options have been updated', "{$this->plugin_slug}_finnish_base_forms") . '</p>';
             echo '    </div>';
         }
+        if ($cache_cleared) {
+            echo '    <div class="notice notice-success">';
+            echo '        <p>' . __('Cache has been cleared', "{$this->plugin_slug}_finnish_base_forms") . '</p>';
+            echo '    </div>';
+        }
         echo '    <form method="post" class="js-finnish-base-forms-form" data-slug="' . $this->plugin_slug . '">';
         echo '    <table class="form-table">';
         echo '        <tbody>';
         echo '            <tr>';
         echo '                <th scope="row">';
-        echo '                    <label for="api_url">' . __('API type', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
+        echo '                    <label for="api_type">' . __('API type', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
         echo '                </th>';
         echo '                <td>';
         echo '                <p><input type="radio" id="ffi" name="api_type" value="ffi" ' . checked($api_type, 'ffi', false) . $disabled . '><label for="ffi">FFI (requires FFI extension, PHP 7.4+)</label></p>';
@@ -103,6 +118,15 @@ class Admin
         echo '            </tr>';
         echo '            <tr>';
         echo '                <th scope="row">';
+        echo '                    <label>' . __('Cache word analysis', "searchwp_finnish_base_forms") . '</label>';
+        echo '                </th>';
+        echo '                <td>';
+        echo '                <input type="checkbox" name="enable_cache" id="enable_cache" value="checked" ' . checked(get_option("{$this->plugin_slug}_finnish_base_forms_enable_cache"), '1', false) . ' />';
+        echo '                <label for="lemmatize_search_query">Enabled</label>';
+        echo '                </td>';
+        echo '            </tr>';
+        echo '            <tr>';
+        echo '                <th scope="row">';
         echo '                    <label>' . __('Convert search query to base forms', "{$this->plugin_slug}_finnish_base_forms") . '</label>';
         echo '                </th>';
         echo '                <td>';
@@ -118,9 +142,15 @@ class Admin
         echo '        </tbody>';
         echo '    </table>';
         echo '    <p class="submit">';
+        echo '        <input type="hidden" name="clear_cache" value="0">';
         echo '        <input class="button-primary js-finnish-base-forms-submit-button" type="submit" name="submit-button" value="Save">';
         echo '    </p>';
         wp_nonce_field("{$this->plugin_slug}_finnish_base_forms");
+        echo '    </form>';
+        echo '     <form method="post">';
+        echo '        <input type="hidden" name="clear_cache" value="1">';
+        wp_nonce_field("{$this->plugin_slug}_finnish_base_forms");
+        echo '        <input class="button js-finnish-base-forms-submit-button" type="submit" name="submit-button" value="Clear Cache">';
         echo '    </form>';
         echo '</div>';
     }

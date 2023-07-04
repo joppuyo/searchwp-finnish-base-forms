@@ -67,7 +67,7 @@ class Plugin
         });
 
         // If plugin is installed, pass all content through lemmatization process
-        if (get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) {
+        if (in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) {
             if ($this->plugin_slug === 'searchwp') {
 
                 //SearchWP 3
@@ -105,7 +105,7 @@ class Plugin
         }
 
         // If "lemmatize search query" option is set, pass user query through lemmatization
-        if ((get_option("{$this->plugin_slug}_finnish_base_forms_api_url") || in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
+        if ((in_array(get_option("{$this->plugin_slug}_finnish_base_forms_api_type"), ['binary', 'command_line', 'ffi'])) && get_option("{$this->plugin_slug}_finnish_base_forms_lemmatize_search_query")) {
             if ($this->plugin_slug === 'searchwp') {
 
                 // SearchWP 3

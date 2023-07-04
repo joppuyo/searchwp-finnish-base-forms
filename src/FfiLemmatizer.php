@@ -1,6 +1,6 @@
 <?php
 
-namespace NPX\FinnishBaseForm;
+namespace NPX\FinnishBaseForms;
 
 use NPX\FinnishBaseForms\Lemmatizer;
 use NPX\FinnishBaseForms\Plugin;
@@ -10,6 +10,8 @@ class FfiLemmatizer extends Lemmatizer
 {
 
     private static $instance;
+
+    private $voikko = null;
 
     public static function get_instance()
     {
@@ -25,14 +27,14 @@ class FfiLemmatizer extends Lemmatizer
 
         $plugin = Plugin::get_instance();
 
-        $path = plugin_dir_path($plugin->__FILE__);
-
-        $voikko = new Voikko('fi', "$path/bin/dictionary", $this->get_library_path());
+        if (empty($this->voikko)) {
+            $path = plugin_dir_path($plugin->__FILE__);
+            $this->voikko = new Voikko('fi', "$path/bin/dictionary", $this->get_library_path());
+        }
 
         $output = [];
 
-
-        $analyzed = $voikko->analyzeWord($word);
+        $analyzed = $this->voikko->analyzeWord($word);
         foreach ($analyzed as $analysis) {
 
             $output_item = [];
@@ -41,7 +43,7 @@ class FfiLemmatizer extends Lemmatizer
 
             $wordbases = $analysis->wordBases;
 
-            if (count($wordbases)) {
+            if (!empty($wordbases)) {
                 $output_item['wordbases'] = $this->parse_wordbases([$wordbases]);
             }
             array_push($output, $output_item);
