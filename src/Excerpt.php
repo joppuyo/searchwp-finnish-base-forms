@@ -275,6 +275,26 @@ class Excerpt
             return $text;
         }
         $spans = $this->find_spans($text, $terms);
+
+        $found_index = 0;
+
+        foreach (str_split($spans) as $index => $char) {
+            if ($char === ']') {
+                $found_index = $index;
+                break;
+            }
+        }
+
+        $last_char = null;
+
+        foreach (str_split($spans) as $index => $char) {
+            if ($index > $found_index + 600 && $last_char === ']') {
+                $spans[$index] = ' ';
+            } else if (in_array($char, ['[', ']'])) {
+                $last_char = $char;
+            }
+        }
+
         $window_start = $this->find_best_window($spans, $window_size);
         if ($window_start === 0) {
             return trim(mb_substr($text, $window_start, $window_size)) . '...';
@@ -302,6 +322,8 @@ class Excerpt
 
         $tokenized = $plugin->tokenize(mb_strtolower($value));
 
+        $found = false;
+
         $characters_processed = 0;
         $desired_length = $length * 2;
 
@@ -318,6 +340,9 @@ class Excerpt
 
             foreach($tokenized as $token) {
 
+                if ($found) {
+                    $characters_processed = $characters_processed + mb_strlen($token);
+                }
 
                 if ($characters_processed > $desired_length) {
                     break;
@@ -328,6 +353,7 @@ class Excerpt
 
                 foreach ($result as $item) {
                     array_push($words_with_tokens[$token], $item['baseform']);
+
                     if (!empty($item['wordbases'])) {
                         $words_with_tokens[$token] = array_merge($words_with_tokens[$token], $item['wordbases']);
                     }
@@ -335,12 +361,10 @@ class Excerpt
 
                 foreach ($words_with_tokens as $original => $tokens) {
                     if (array_intersect($tokens, $query)) {
-                        $characters_processed = $characters_processed + mb_strlen($token);
+                        $found = true;
                     }
                 }
             }
-
-            //dump($words_with_tokens);
 
             foreach ($words_with_tokens as $original => $tokens) {
                 if (array_intersect($tokens, $query)) {
