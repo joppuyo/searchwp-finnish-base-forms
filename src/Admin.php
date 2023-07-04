@@ -33,7 +33,7 @@ class Admin
     public function plugin_action_links ($links) {
         $settings_link = "<a href=\"options-general.php?page={$this->plugin_slug}_finnish_base_forms\">" . __('Settings', "{$this->plugin_slug}_finnish_base_forms") . '</a>';
 
-        array_push($links, $settings_link);
+        array_unshift($links, $settings_link);
         return $links;
     }
 
