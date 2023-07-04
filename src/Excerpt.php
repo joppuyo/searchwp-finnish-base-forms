@@ -167,7 +167,12 @@ class Excerpt
                 continue;
             }
 
-            $matched_field = strip_tags(html_entity_decode($field[0]));
+            $matched_field = $field[0];
+            $matched_field = Plugin::strip_html($matched_field);
+
+            if (mb_strlen($matched_field) > 65535) {
+                $matched_field = mb_substr($matched_field, 0, 65535);
+            }
 
             $matches = $this->get_matches($matched_field, $query, $options['length']);
 
