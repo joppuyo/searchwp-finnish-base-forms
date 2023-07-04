@@ -35,10 +35,22 @@ class Excerpt
         $defaults = [
             'length' => 300,
             'fallback' => function ($post) {
+
                 if (strlen($post->post_excerpt)) {
-                    return strip_tags(html_entity_decode($post->post_excerpt));
+                    return Plugin::strip_html($post->post_excerpt);
                 }
-                return strip_tags(html_entity_decode($post->post_content));
+
+                $post = get_post($post);
+
+                if (class_exists('\\SearchWP\\Document')) {
+                    $document_content = \SearchWP\Document::get_content($post);
+
+                    if ($document_content) {
+                        return Plugin::strip_html($document_content);
+                    }
+                }
+
+                return Plugin::strip_html($post->post_content);
             },
             'query' => get_search_query(),
         ];
@@ -84,7 +96,9 @@ class Excerpt
         Plugin::debug('$searchwp');
         Plugin::debug($searchwp);
 
-        $keys = ['wp_excerpt', 'wp_content'];
+        // searchwp_content = pdf/docx content
+
+        $keys = ['wp_excerpt', 'wp_content', 'searchwp_content'];
 
         // SearchWP 4
         if (empty($searchwp->diagnostics)) {
@@ -185,7 +199,12 @@ class Excerpt
                     }
                 );
 
+
+
                 $result = $this->do_it($matched_field, $matches, $options['length']);
+
+                $result = htmlspecialchars($result);
+
                 $result = preg_replace(
                     "/" . implode('|', array_map('preg_quote', $matches)) . "/i",
                     '<strong>$0</strong>',
